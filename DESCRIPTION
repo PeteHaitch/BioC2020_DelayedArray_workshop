@@ -1,0 +1,24 @@
+Package: DelayedArrayWorkshop
+Type: Package
+Title: A Workshop on Effectively Using the DelayedArray Framework to Support the Analysis of Large Datasets
+Authors@R: c(
+  person("Hickey", "Peter", role = c("aut", "cre"),
+         email = "peter.hickey@gmail.com"))
+Version: 0.0.99
+Description: This workshop will teach the fundamental concepts underlying the 
+  DelayedArray framework and related infrastructure. 
+Suggests: BiocStyle, knitr
+Imports: 
+  TENxBrainData,
+  BiocPkgTools,
+  tidygraph,
+  ggraph,
+  DelayedArray,
+  Matrix,
+  tibble,
+  SummarizedExperiment,
+  HDF5Array,
+  rhdf5client,
+  h5vcData
+License: Artistic-2.0
+VignetteBuilder: knitr
