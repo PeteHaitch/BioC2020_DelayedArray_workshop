@@ -19,6 +19,11 @@ Imports:
   SummarizedExperiment,
   HDF5Array,
   rhdf5client,
-  h5vcData
+  h5vcData,
+  dplyr,
+  matrixStats,
+  memuse,
+  rhdf5,
+  tidyr
 License: Artistic-2.0
 VignetteBuilder: knitr
