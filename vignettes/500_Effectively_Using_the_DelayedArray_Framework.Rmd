@@ -23,6 +23,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Effectively using the DelayedArray framework to support the analysis of large datasets
+
 ## Overview
 
 ### Description
@@ -100,7 +102,9 @@ Within **Bioconductor**, the *SummarizedExperiment* class is the recommended con
 
 **TODO:** Re-use existing SE figure.
 
-![The _SummarizedExperiment_ class is used to store rectangular arrays of experimental results (_assays_). Although each _assay_ is here drawn as a matrix, higher-dimensional arrays are also supported.](../vignettes/SummarizedExperiment.png)
+The _SummarizedExperiment_ class is used to store rectangular arrays of experimental results (_assays_).
+Although each _assay_ is here drawn as a matrix, higher-dimensional arrays are also supported.
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "SummarizedExperiment.png"))`
 
 Traditionally, the assay data are stored in-memory as an ordinary *array* object^[In R, a *matrix* is just a 2-dimensional *array*]. 
 Storing the data in-memory becomes a real pain with the ever-growing size of 'omics datasets; it is now not uncommon to collect $10,000-100,000,000$ measurements on $100 - 1,000,000$ samples, which would occupy $10-1,000$ gigabytes (GB) if stored in-memory as ordinary R arrays!
@@ -703,19 +707,13 @@ Block-processing allows you to iterate over blocks of a *DelayedArray* in a mann
 
 The following cartoon illustrates the basic idea of block-processing:
 
-![](../vignettes/Slide1.png)
-
-![](../vignettes/Slide2.png)
-
-![](../vignettes/Slide3.png)
-
-![](../vignettes/Slide4.png)
-
-![](../vignettes/Slide5.png)
-
-![](../vignettes/Slide6.png)
-
-![](../vignettes/Slide7.png)
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide1.png"))`
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide2.png"))`
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide3.png"))`
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide4.png"))`
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide5.png"))`
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide6.png"))`
+`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide7.png"))`
 
 To implement block-processing, we first construct an *ArrayGrid* over the *DelayedArray*.
 Each element of the *ArrayGrid* is called an *ArrayViewport*.
