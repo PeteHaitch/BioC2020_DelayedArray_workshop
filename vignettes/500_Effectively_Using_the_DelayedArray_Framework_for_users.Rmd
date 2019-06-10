@@ -1,0 +1,246 @@
+---
+output:
+  rmarkdown::html_document:
+   highlight: pygments
+   toc: true
+   toc_depth: 3
+   fig_width: 5
+vignette: >
+  %\VignetteIndexEntry{Effectively using the DelayedArray framework as a user to support the analysis of large datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[ut8]{inputenc}
+---
+
+```{r setup, include = FALSE, cache = FALSE}
+knitr::opts_chunk$set(
+    comment = "#>",
+    collapse = TRUE)
+```
+
+# Effectively using the DelayedArray framework as a user to support the analysis of large datasets
+
+BioC 2019: 24-27 June
+
+## Instructors
+
+- Peter Hickey (hickey@wehi.edu.au)
+
+## Workshop description
+
+This workshop gives an introductory overview of the DelayedArray framework, which can be used by Bioconductor packages to support the analysis of large datasets.
+A *DelayedArray* is like an ordinary array in R, but allows for the data to be in-memory^[Including space-efficient formats like sparse arrays and run length encoded arrays], on-disk in a file, or even hosted on a remote server.
+Participants will learn where they might encounter a *DelayedArray* in the wild while using Bioconductor and help them understand the fundamental concepts underlying the framework.
+This workshop will be a mixture of lecture with example code and discussion.
+Examples will mostly be drawn from the analysis of single-cell RNA-sequencing data, as well as whole-genome bisulfite sequencing and coverage-based assays like ATAC-seq and ChIP-seq.
+
+### Pre-requesites
+
+- Basic knowledge of R syntax.
+- Familiarity with common operations on matrices in R, such as `colSums()` and `colMeans()`.
+- Some familiarity with S4 objects may be helpful but is not required.
+- Some familiarity with single-cell RNA-sequencing may be helpful but is not required.
+
+### Workshop Participation
+
+Students will be able to run code interactively during the workshop.
+There will be opportunities throughout the workshop for questions and discussion.
+
+### _R_ / _Bioconductor_ packages used
+
+**TODO:** Once written, go through material and add here.
+
+- DelayedArray
+- HDF5Array
+- BiocSingular
+
+### Time outline
+
+**TODO:** Update
+
+| Activity                  | Time |
+|---------------------------|------|
+| Part 1: Before the break  | 50m  |
+| Part 2: After the break   | 50m  |
+
+### Workshop goals and objectives
+
+#### Learning goals
+
+- Learn of existing packages and functions that *use* the DelayedArray framework.
+- Develop a high-level understanding of classes and packages that *implement* the DelayedArray framework.
+- Become familiar with the fundamental concepts of delayed operations, block-processing, and realization.
+- Reason about potential bottlenecks in algorithms operating on *DelayedArray* objects.
+- Reason about parallelisation strategies for algorithms operating on *DelayedArray* objects.
+
+#### Learning objectives
+
+- Identify when an object is a *DelayedArray* or one of its derivatives.
+- Be able to recognise when it is useful to use a *DelayedArray* instead of an ordinary array or other array-like data structure.
+- Learn how to load and save a DelayedArray-backed object.
+- Learn how the 'block size' and 'chunking' of the data set affect performance when operating on *DelayedArray* objects.
+- Take away some miscellaneous tips and tricks I've learnt over the years when working with DelayedArray-backed objects.
+
+## Introductory material (5 mins)
+
+Data from a high-throughput biological assay, such as single-cell RNA-sequencing (scRNA-seq), will often be summarised as a matrix of counts, where rows correspond to features and columns to samples^[Higher-dimensional arrays may be appropriate for some types of assays.].
+Within **Bioconductor**, the *SummarizedExperiment* class is the recommended container for such data, offering a rich interface that tightly links assay measurements to data on the features and the samples.
+
+The _SummarizedExperiment_ class is used to store rectangular arrays of experimental results (_assays_).
+Here, each _assay_ is drawn as a matrix but higher-dimensional arrays are also supported.
+
+```{r include = FALSE}
+# download current version of SE diagram
+se_path <- file.path(tempdir(), "SE.svg")
+download.file(
+  "https://docs.google.com/feeds/download/drawings/Export?id=1kiC8Qlo1mhSnLDqkGiRNPSo6GWn3C2duBszCFbJCB-g&exportFormat=svg", 
+  se_path)
+```
+
+`r knitr::include_graphics(se_path)`
+
+Traditionally, the assay data are stored in-memory as an ordinary *array* object^[In R, a *matrix* is just a 2-dimensional *array*]. 
+Storing the data in-memory becomes a real pain with the ever-growing size of 'omics datasets.
+It is now not uncommon to collect $10,000-100,000,000$ measurements on $100 - 1,000,000$ samples, which would occupy $10-1,000$ gigabytes (GB) if stored in-memory as ordinary R arrays.
+
+## First contact (15 mins)
+
+We will begin with an example using some single-cell RNA-seq data on 1.3 million brain cells from embryonic mice, generated by 10X Genomics.
+These data are available in the **TENxBrainData** Bioconductor package.
+
+```{r, message = FALSE}
+# NOTE: The TENxBrainData package loads and attaches the DelayedArray package, 
+#       amongst others.
+library(TENxBrainData)
+
+# NOTE: This will download the data and may take a little while on the first 
+#       run. The result will be cached, however, so subsequent runs avoid 
+#       re-downloading the data.
+tenx <- TENxBrainData()
+```
+
+Let's take a look at the `tenx` object.
+
+```{r}
+tenx
+```
+
+The data are stored in a *SingleCellExperiment* object, an extension of the *SummarizedExperiment* class.
+With data from 1.3 million cells, this is roughly 100,000-times more samples
+than a typical bulk RNA-seq data set and would occupy 146 GB in-memory if stored as an ordinary *matrix*.
+
+We might expect that interacting with an object containing this many samples would feel sluggist, but this is not the case.
+For example, we can efficiently subset the object.
+
+```{r}
+# Take a random sample of 1000 genes and 200000 samples
+tenx[sample(nrow(tenx), 1000), sample(ncol(tenx), 200000)]
+```
+
+Now, this efficiency could all be down to some trickery through the outer *SingleCellExperiment* class.
+To make things clearer, we'll extract the `counts` assay.
+
+```{r}
+# NOTE: We'll discuss the use of `withDimnames = FALSE` later in the workshop.
+tenx_counts <- assay(tenx, "counts", withDimnames = FALSE)
+```
+
+Now, let's do something that would ordinarily be a terrible idea, and something that's frustrated me way too many times: let's "accidentally" print out the entire counts matrix.
+
+```{r}
+tenx_counts
+```
+
+Hallelujah!
+Unlike what you may have experienced when printing out a large matrix, this didn't overwhelm the screen with thousands of lines of output nor did it cause the R session to hang indefinitely.
+In fact, this gives us a rather pretty printing of the counts matrix^[You may have seen similar pretty printing with other Bioconductor objects such as *GRanges* and *DataFrame* or with the *data.table* and *tbl* extensions to the *data.frame*. I can't say enough how much I appreciate these thoughtful touches when doing interactive data analysis.].
+No need for panicked mashing of `Ctrl-c` or `Esc`. 
+
+We can now clearly see that `tenx_counts` is no ordinary *matrix*.
+In fact, it is an *HDF5Matrix*, which is a type of *DelayedArray*^[As with a 2-dimensional *array* in base R being commonly known as a *matrix*, a 2-dimensional *DelayedArray* is also known as a *DelayedMatrix* and a 2-dimensional *HDF5Array* is also known as a *HDF5Matrix*.].
+
+```{r}
+class(tenx_counts)
+is(tenx_counts, "DelayedArray")
+```
+
+The data contained in an *HDF5Matrix* is actually stored on disk in a [Hierarchical Data Format (**HDF5**)](https://en.wikipedia.org/wiki/Hierarchical_Data_Format) file.
+Consequently, the `tenx_counts` object takes up very little space in memory.
+
+```{r}
+print(object.size(tenx_counts), units = "auto")
+```
+
+We can learn more about the internals of the `tenx_counts` object using the `seed()` function^[We will revisit the `chunkdim` component of the *HDF5Matrix* object later in the workshop.].
+
+```{r}
+seed(tenx_counts)
+```
+
+We will now play around with computing on the counts matrix.
+To make things slightly easier, we will first take a subset of the data.
+
+```{r}
+tenx_counts_subset <- tenx_counts[, 1:1000]
+tenx_counts_subset
+```
+
+Taking a careful look at the above, we see that `tenx_counts_subset` is a *DelayedMatrix* rather than an *HDF5Matrix*.
+The `showtree()` function can help us see what changed.
+
+```{r}
+showtree(tenx_counts_subset)
+```
+
+### TODOs
+
+In this section also demo:
+
+- [ ] DelayedMatrixStats
+- [ ] `tenx_counts_subset + 1` and other delayed ops.
+- [ ] Deferred PCA?
+
+
+## Real world encounters with DelayedArray (15 mins)
+
+### Real world example
+
+- Take a 10x data set in TENxMatrix format.
+
+- Might feature some of the cools things Aaron has been doing with DA
+  - DeferredMatrix
+  - LowRankMatrix
+  - beachmat
+
+### Package ecosystem (15 mins)
+
+- Key user-facing packages
+- Key developer-facing packages
+
+### Things DA has enabled (5 mins)
+
+## Workflow for DelayedArray-backed analyses (50 mins)
+
+- Saving and loading DA- and HDF5A-backed objects
+- Writing functions that 'consume' DAs
+- Avoid subsetting too much
+- Avoid random access patterns
+- Process, save, analyse
+
+### Tips 'n' tricks
+
+- How block size and chunking affect performance
+- Parallelisation strategies that work and suck
+- Easy wins when using DA
+- Debugging
+
+```{r, echo = FALSE}
+knitr::knit_exit()
+```
+
+## TODOs
+
+- [x] Re-use existing SE figure (https://github.com/Bioconductor/SummarizedExperiment/blob/1c9719593f1a5fcb3ebe1c8cff2029c6039445e0/vignettes/SummarizedExperiment.Rmd#L71-L78)
+- [ ] Remove old SE figure from package.
+- [ ] Find a 10x data set in TENxData format
+- [ ] Perhaps use the TENxBrainData20k() data instead.
+- [x] Separate code blocks where an option to improve clarity.
