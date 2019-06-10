@@ -4,11 +4,12 @@ Title: A Workshop on Effectively Using the DelayedArray Framework to Support the
 Authors@R: c(
   person("Hickey", "Peter", role = c("aut", "cre"),
          email = "peter.hickey@gmail.com"))
-Version: 0.0.99
+Version: 0.99.1
 Description: This workshop will teach the fundamental concepts underlying the 
   DelayedArray framework and related infrastructure. 
 Suggests: BiocStyle, knitr
 Imports: 
-  TENxBrainData
+  TENxBrainData,
+  DelayedMatrixStats
 License: Artistic-2.0
 VignetteBuilder: knitr
