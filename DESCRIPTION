@@ -9,21 +9,6 @@ Description: This workshop will teach the fundamental concepts underlying the
   DelayedArray framework and related infrastructure. 
 Suggests: BiocStyle, knitr
 Imports: 
-  TENxBrainData,
-  BiocPkgTools,
-  tidygraph,
-  ggraph,
-  DelayedArray,
-  Matrix,
-  tibble,
-  SummarizedExperiment,
-  HDF5Array,
-  rhdf5client,
-  h5vcData,
-  dplyr,
-  matrixStats,
-  memuse,
-  rhdf5,
-  tidyr
+  TENxBrainData
 License: Artistic-2.0
 VignetteBuilder: knitr
