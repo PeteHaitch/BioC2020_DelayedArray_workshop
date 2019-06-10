@@ -7,9 +7,11 @@ Authors@R: c(
 Version: 0.99.1
 Description: This workshop will teach the fundamental concepts underlying the 
   DelayedArray framework and related infrastructure. 
-Suggests: BiocStyle, knitr
-Imports: 
+Suggests: knitr
+Imports:
+  DelayedArray,
   TENxBrainData,
-  DelayedMatrixStats
+  DelayedMatrixStats,
+  bench
 License: Artistic-2.0
 VignetteBuilder: knitr
