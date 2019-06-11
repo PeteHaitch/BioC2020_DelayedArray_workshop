@@ -220,22 +220,18 @@ summary(prop_non_zero)
 #### Median expression of each gene
 
 Finally, suppose we want to know the median expression of each gene.
-Here, we will quantify expression on the log~2~ scale using a crude library size normalization.
+Here, we will quantify expression as counts per million (CPM) using library size normalization.
 
 ```{r}
-norm_log_expression <- sweep(
-  log2(tenx_counts_subset + 1L), 
-  MARGIN = 2, 
-  STATS = log2(lib_sizes),
-  FUN = "-")
-norm_log_expression
+cpm <- t(t(1e6 * tenx_counts_subset) / lib_sizes)
+cpm
 ```
 
 We can then compute the median expression of each gene using `DelayedMatrixStats::rowMedians()`.
 
 ```{r}
 library(DelayedMatrixStats)
-median_expression <- rowMedians(norm_log_expression)
+median_expression <- rowMedians(cpm)
 summary(median_expression)
 ```
 
@@ -248,7 +244,7 @@ Also note that all 3 examples returned ordinary R vectors.
 ```{r}
 class(lib_sizes)
 class(prop_non_zero)
-class(median_expression)
+class(cpm)
 ```
 
 To do so, we made (implicit) use of the three fundamental concepts of the DelayedArray framework:
