@@ -502,18 +502,30 @@ tenx_counts_subset %*% matrix(1, nrow = ncol(tenx_counts_subset))
 
 #### DelayedMatrixStats
 
-- 1 minute spiel
-- Link to README
+We've already seen the [**DelayedMatrixStats**](http://bioconductor.org/packages/DelayedMatrixStats/) package in action back when computing the [Median expression of each gene].
+**DelayedMatrixStats** is a port of the [**matrixStats**](https://CRAN.R-project.org/package=matrixStats) API for use with *DelayedMatrix* objects.
+It provides [more than 70 functions](https://github.com/PeteHaitch/DelayedMatrixStats#api-coverage) that apply to rows and columns of *DelayedMatrix* objects
 
 #### General block-processing
 
-- Advanced topic, skip over for the most part.
+As we have seen, many common block-processing operations on a *DelayedMatrix* have already been implemented in **DelayedArray** or are provided by **DelayedMatrixStats**.
+Nonetheless, there may be times you need to implement your own algorithm using block-processing.
+The documentation on this topic is a little sparse, but some details can be found in `help("block_processing", "DelayedArray")` and `help("ArrayGrid", "DelayedArray")` or by reading the source code of the aforementioned packages.
+Briefly, to perform block-processing requires that you:
+
+1. Set up an *ArrayGrid* over your *DelayedArray*. This specifies the 'block' structure that will be traversed when processing the *DelayedArray*.
+2. Iterate over the *DelayedArray* via the *ArrayGrid*
+  a. Read each block of data into memory as an ordinary array using `read_block()`.
+  b. Compute the statistic for that block
+3. Appropriately combine the block-level statistics to get your final result.
+
+The `blockApply()` and `blockReduce()` functions can help facilitate steps 1-3 , even incorporating parallelization via the [**BiocParallel**](http://bioconductor.org/packages/BiocParallel/) package.
 
 ### Realization
 
 - [ ] Implicit realization
 - [ ] Explicit realization
-- [ ] Realizing to a non-array backend.
+- [ ] Realizing to a non-array backend
   - [ ] Matrix multiplication
 
 ## Real world encounters with DelayedArray (15 mins)
