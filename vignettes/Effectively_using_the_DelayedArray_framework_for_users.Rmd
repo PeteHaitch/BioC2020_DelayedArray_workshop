@@ -299,7 +299,7 @@ tlx <- t(lx)
 showtree(tlx)
 
 # Realize a subset of the data as an ordinary matrix.
-as.matrix(tlx[1:5, 1:10])
+as.array(tlx[1:5, 1:10])
 ```
 
 Many common operations can be registered as delayed operations.
@@ -336,7 +336,8 @@ showtree(val)
 #### DelayedSubassign
 
 ```{r}
-# NOTE: Be careful with this one.
+# NOTE: Be careful with delayed subassignment. You can end up with objects that 
+#       are surprisingly large in-memory.
 tmp <- tenx_counts
 tmp[, 1] <- 100
 tmp
@@ -393,13 +394,13 @@ In [Library sizes], we needed to compute the column sums of `tenx_counts_subset`
 One way of achieving this would be to load the entire data set into memory as an ordinary matrix and then run `base::colSums()`^[Here, I use the 'namespaced function' notation for didactic purposes to distinguish `base::colSums()` from the S4 generic `colSums()` and its associated methods. When writing code, however, it is generally not necessary to use the `package::function()` notation, except for all the times that it is ...].
 
 ```{r}
-lib_sizes_in_mem <- colSums(as.matrix(tenx_counts_subset))
+lib_sizes_in_mem <- colSums(as.array(tenx_counts_subset))
 # Check we get the same result as before.
 identical(lib_sizes_in_mem, lib_sizes)
 ```
 
-Here the data at `r print(object.size(as.matrix(tenx_counts_subset)), units = "auto")` are small enough to load into memory, but what if that's not the case^[For example, recall that the `tenx_counts` data would occupy > 146 GB in memory.]?
-One way you might think to do this is to loop over the columns of the matrix, load that column into memory, and compute it's sum^[In the following code example we could replace `as.matrix(colSums(tenx_counts_subset[, j, drop = FALSE]))` with `sum(tenx_counts_subset[, j, drop = TRUE})` or, more simply, `sum(tenx_counts_subset[, j])`. This is because subsetting a *DelayedArray* returns an ordinary vector when `drop = TRUE` and the result has only one dimension; see 'Subsetting' in `help("DelayedArray", package = "DelayedArray")`.]
+Here the data at `r print(object.size(as.array(tenx_counts_subset)), units = "auto")` are small enough to load into memory, but what if that's not the case^[For example, recall that the `tenx_counts` data would occupy > 146 GB in memory.]?
+One way you might think to do this is to loop over the columns of the matrix, load that column into memory, and compute it's sum^[In the following code example we could replace `as.array(colSums(tenx_counts_subset[, j, drop = FALSE]))` with `sum(tenx_counts_subset[, j, drop = TRUE])` or, more simply, `sum(tenx_counts_subset[, j])`. This is because subsetting a *DelayedArray* returns an ordinary vector when `drop = TRUE` and the result has only one dimension; see 'Subsetting' in `help("DelayedArray", package = "DelayedArray")`.]
 
 ```{r}
 lib_sizes_loop_over_cols <- vector("numeric", ncol(tenx_counts_subset))
@@ -407,7 +408,7 @@ for (j in seq_len(ncol(tenx_counts_subset))) {
   # A simple progress report.
   if (j %% 100 == 0) message("Processed ", j, "/", ncol(tenx_counts_subset))
   lib_sizes_loop_over_cols[j] <- colSums(
-    as.matrix(tenx_counts_subset[, j, drop = FALSE]))
+    as.array(tenx_counts_subset[, j, drop = FALSE]))
 }
 # Check we get the same result as before.
 identical(lib_sizes_loop_over_cols, lib_sizes)
@@ -428,7 +429,8 @@ for (j in seq_len(ncol(tenx_counts_subset))) {
   for (i in 1:2) {
     i1 <- (i - 1) * nr / 2 + 1
     i2 <- i * nr / 2
-    tmp_colsums[i] <- colSums(as.matrix(tenx_counts_subset[seq(i1, i2), j]))
+    tmp_colsums[i] <- colSums(
+      as.array(tenx_counts_subset[seq(i1, i2), j, drop = FALSE]))
   }
   lib_sizes_loop_over_cols_subset[j] <- sum(tmp_colsums)
 }
@@ -496,7 +498,7 @@ head(t(lib_sizes_grouped))
 Finally, matrix multiplication is implemented as a block-processed operation.
 
 ```{r}
-# Conceptually equivalent to rowSums(tenx_counts_subset)
+# This is mathematically equivalent to rowSums(tenx_counts_subset).
 tenx_counts_subset %*% matrix(1, nrow = ncol(tenx_counts_subset))
 ```
 
@@ -688,7 +690,7 @@ Here, this strategy (the 'load it all into memory' strategy) works and is in fac
 
 ```{r}
 bench::mark(
-  colSums(as.matrix(tenx_counts_subset)),
+  colSums(as.array(tenx_counts_subset)),
   colSums(tenx_counts_subset),
   min_iterations = 10)
 ```
