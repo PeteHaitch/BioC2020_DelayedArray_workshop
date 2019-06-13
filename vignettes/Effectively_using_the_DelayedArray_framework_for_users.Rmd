@@ -523,12 +523,135 @@ The `blockApply()` and `blockReduce()` functions can help facilitate steps 1-3 ,
 
 ### Realization
 
-- [ ] Implicit realization
-- [ ] Explicit realization
-- [ ] Realizing to a non-array backend
-  - [ ] Matrix multiplication
+To *realize* a *DelayedArray* object is to trigger execution of the delayed operations carried by the object and return the result as an ordinary array,
+One way to achieve this is to call `as.array()` on it.
 
-## Real world encounters with DelayedArray (15 mins)
+```{r}
+tenx_counts_subset_realized <- as.array(tenx_counts_subset)
+tenx_counts_subset_realized[1:10, 1:10]
+```
+
+However, this realizes the full object at once in memory which could require too much memory if the object is big^[In the above example it's safe because `tenx_counts_subset_realized` only requires `r print(object.size(tenx_counts_subset_realized), units = "auto")` of memory.]
+A large *DelayedArray* object is preferrably realized on disk, which is most commonly an HDF5 file.
+
+#### Realizing to an HDF5 file
+
+Realizing to an HDF5 file requires that the **HDF5Array** package is installed^[The **TENxBrainData** package depends upon **HDF5Array**, so it is already installed. If you've been following this workflow then you've also already attached it to the search path by running `library(TENxBrainData)`.]
+
+```{r}
+tenx_counts_subset_hdf5 <- writeHDF5Array(tenx_counts_subset)
+tenx_counts_subset_hdf5
+
+# Alterntivaly, we could 'coerce' the result to be an HDF5Array.
+as(tenx_counts_subset, "HDF5Array")
+```
+
+Notice that this process of realization used block-processing, which avoids loading the entire dataset entire memory.
+Also notice that the result of realization is here returned as an *HDF5Matrix*, which no longer carries around the delayed operations.
+
+```{r}
+class(tenx_counts_subset)
+class(tenx_counts_subset_hdf5)
+
+showtree(tenx_counts_subset)
+showtree(tenx_counts_subset_hdf5)
+```
+
+Used like this, `writeHDF5Array()` and `as(..., "HDF5Array")` will write their results to a file in *HDF5 dump directory*, a dumping ground for automatically created HDF5 datasets.
+We can see a log of the operations that have written to the HDF5 dump directory using `showHDF5DumpLog()`.
+
+```{r}
+showHDF5DumpLog()
+```
+
+Often, however, we will want full control of where and how the data are written to the HDF5 file^[We'll discuss why you might want this in the second half of the workshop.] and the `writeHDF5Array()` function gives you full control over this and more.
+
+```{r}
+# Write the data to a user-specified HDF5 file using maximum compression and 
+# 'chunking' along the columns.
+my_hdf5_file <- tempfile(fileext = ".h5")
+tenx_counts_subset_my_file_hdf5 <- writeHDF5Array(
+  tenx_counts_subset,
+  filepath = my_hdf5_file,
+  chunkdim = c(nrow(tenx_counts_subset), 1),
+  level = 9)
+
+# Compare `tenx_counts_subset_hdf5` to `tenx_counts_subset_my_file_hdf5`
+seed(tenx_counts_subset_hdf5)
+seed(tenx_counts_subset_my_file_hdf5)
+```
+
+#### Realization backends
+
+We've now seen that we can realize to an HDF5 file.
+This is called as the HDF5Array 'realization backend' and is implemented in the **HDF5Array** package.
+There are a few other realization backends to be aware of.
+
+```{r}
+supportedRealizationBackends()
+```
+
+There is also the `NULL` backend, which means the data are realized in memory as an ordinary *array* and then wrapped in a *DelayedArray*.
+This is the default realization backend upon loading/attaching the **DelayedArray** package.
+
+```{r}
+getRealizationBackend()
+```
+
+The default realization backend can be altered with `setRealizationBackend()`.
+
+```{r}
+setRealizationBackend("HDF5Array")
+getRealizationBackend()
+setRealizationBackend(NULL)
+getRealizationBackend()
+```
+
+It can be important to know what your current realization backend is because it will be used implicitly by some functions.
+For example, matrix multiplication that involves a *DelayedMatrix* uses the current realization backend.
+
+```{r}
+setRealizationBackend("HDF5Array")
+tenx_counts_subset %*% matrix(1, nrow = ncol(tenx_counts_subset))
+
+setRealizationBackend(NULL)
+tenx_counts_subset %*% matrix(1, nrow = ncol(tenx_counts_subset))
+```
+
+#### The `realize()` function
+
+We've seen that we can realize to the HDF5Array backend using `writeHDF5Array(tenx_counts_subset)` and `as(tenx_counts_subset, "HDF5Array")`.
+A third way of realizing a *DelayedArray* to an HDF5 file is with the `realize()` function.
+
+```{r}
+realize(tenx_counts_subset, BACKEND = "HDF5Array")
+```
+
+So why might you use `realize()` instead of these other options?
+Because it allows us to easily switch out the realization backend and will defer to the current realization backend if none is supplied.
+
+```{r}
+# Realize to the current realization backend.
+getRealizationBackend()
+realize(tenx_counts_subset)
+
+# Realize as an RleArray.
+setRealizationBackend("RleArray")
+tenx_counts_subset_rlearray <- realize(tenx_counts_subset)
+tenx_counts_subset_rlearray
+
+# Switch back to the default backend.
+setRealizationBackend(NULL)
+```
+
+This is probably most useful when writing package code so that you can allow the user control over the realization backend.
+
+## Package ecosystem (10 mins)
+
+- Key user-facing packages
+- Key developer-facing packages
+
+## Real world encounters with DelayedArray (20 mins)
 
 - Take a 10x data set in TENxMatrix format.
 
