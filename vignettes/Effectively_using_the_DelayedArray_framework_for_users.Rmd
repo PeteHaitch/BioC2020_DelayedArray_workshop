@@ -650,8 +650,69 @@ This is probably most useful when writing package code so that you can allow the
 
 ## Package ecosystem (10 mins)
 
-- Key user-facing packages
-- Key developer-facing packages
+The DelayedArray framework is, unsurprisingly, implemented in the **DelayedArray** package.
+However, there are several other key packages that are an important part of the broader 'ecosystem'.
+More importantly, as a user of Bioconductor software, it is increasingly likely that you will encounter *DelayedArray* objects during a data analysis, especially if you are analysing single-cell data^[In fact, if you use any package that makes use of the *SummarizedExperiment* class, then you will almost certainly load the **DelayedArray** package during the course of your analysis, whether you know it or not! This is because **SummarizedExperiment** depends upon **DelayedArray**.].
+THe following table lists packages that depend upon the **DelayedArray** package.
+
+```{r}
+dep_tbl <- BiocPkgTools::buildPkgDependencyDataFrame()
+da_dep_tbl <- dep_tbl[dep_tbl$dependency == "DelayedArray", 
+                      c("Package", "edgetype")]
+da_dep_tbl <- da_dep_tbl[with(da_dep_tbl, order(edgetype, Package)), ]
+colnames(da_dep_tbl) <- c("Package", "Dependency Type")
+rmarkdown::paged_table(da_dep_tbl)
+```
+
+We will briefly highlight some of the key packages in this table, broadly categorising these as 'user-focused'/'user-facing' or 'developer-focused' packages
+
+### User-focused/user-facing packages
+
+These are the packages that as a user you might directly load/attach with `library()` as part of a data analysis.
+Alternatively, these may be loaded/attached as a dependency^[As listed in the `Depends` field of the package `DESCRIPTION` file.] of another package you load/attach as part of an analysis.
+
+**TODO:** One or two sentence description of why you might care about this package and where you might encounter DelayedArray when using it.
+
+#### DropletUtils
+
+#### batchelor
+
+#### BiocSingular
+
+#### bsseq
+
+#### minfi
+
+#### LoomExperiment
+
+#### mbkmeans
+
+#### scater
+
+#### GDSArray
+
+#### restfulSE
+
+#### VCFArray
+
+#### HDF5Array
+
+#### DelayedMatrixStats
+
+#### scMeth
+
+### Developer-focused packages
+
+#### beachmat
+
+#### DelayedArray
+
+#### HDF5Array
+
+#### GDSArray
+
+#### VCFArray
+
 
 ## Real world encounters with DelayedArray (20 mins)
 
@@ -677,6 +738,7 @@ This is probably most useful when writing package code so that you can allow the
 - Easy wins when using DA
 - Debugging
 - `withDimnames = FALSE`
+- `rhdf5::h5ls()`
 
 
 ### Block-processing performance
@@ -698,6 +760,111 @@ knitr::knit_exit()
 
 - [ ] Update block-processing figures because code has changed. 
 - [ ] Find a 10x data set in TENxData format
-- [x] Perhaps use the TENxBrainData20k() data instead.
-  - Nah, full data should be fine (but have posted https://github.com/Bioconductor/BiocWorkshops2019/issues/31)
-- [x] Separate code blocks where an option to improve clarity.
+
+```{r, echo = FALSE, eval = FALSE}
+# NOTE: This is a lot of code to generate a graph containing little information.
+
+
+library(ggraph)
+library(magrittr)
+
+# NOTE: Adapted from http://lazappi.id.au/2018/06/exploring-the-sce-verse/.
+get_bioc_deps <- function(bpi, pkg, reverse) {
+  deps <- bpi %>%
+    dplyr::filter(Package == pkg)
+  
+  if (reverse) {
+    deps <- deps %>%
+      dplyr::select(
+        Depends = dependsOnMe,
+        Imports = importsMe,
+        Suggests = suggestsMe)
+  } else {
+    deps <- deps %>%
+      dplyr::select(Depends, Imports, Suggests)
+  }
+  
+  deps <- deps %>%
+    tidyr::gather(key = "type", value = "package") %>%
+    tidyr::separate_rows() %>%
+    dplyr::filter(!is.na(package))
+  
+  if (reverse) {
+    deps <- deps %>%
+      dplyr::mutate(package2 = pkg) %>%
+      dplyr::rename(package1 = package)
+  } else {
+    deps <- deps %>%
+      dplyr::mutate(package1 = pkg) %>%
+      dplyr::rename(package2 = package)
+  }
+  
+  deps <- deps %>% 
+    dplyr::select(package1, Dependency = type, package2)
+}
+# NOTE: From http://lazappi.id.au/2018/06/exploring-the-sce-verse/
+get_cran_deps <- function(pkg, db, reverse) {
+  
+  types <- c("Depends", "Imports", "Suggests")
+  
+  deps <- sapply(types, function(type) {
+    deps <- tools::package_dependencies(
+      pkg,
+      db,
+      which = type,
+      reverse = reverse)
+    c(type = type, package = paste(deps[[1]], collapse = ", "))
+  })
+  
+  deps <- deps %>%
+    t() %>%
+    dplyr::as_data_frame() %>%
+    dplyr::mutate(type = tolower(type)) %>%
+    dplyr::filter(package != "") %>%
+    tidyr::separate_rows(package)
+  
+  if (nrow(deps) == 0) {
+    return(
+      dplyr::tibble(
+        package1 = character(),
+        Dependency = character(),
+        package2 = character()))
+  }
+  
+  if (reverse) {
+    deps <- deps %>%
+      dplyr::mutate(package2 = pkg) %>%
+      dplyr::rename(package1 = package)
+  } else {
+    deps <- deps %>%
+      dplyr::mutate(package1 = pkg) %>%
+      dplyr::rename(package2 = package)
+  }
+  
+  deps <- deps %>% dplyr::select(package1, Dependency = type, package2)
+}
+
+bpi <- BiocPkgTools::biocPkgList()
+db <- available.packages(repos = "http://cran.r-project.org")
+bioc_revdeps <- get_bioc_deps(bpi, "DelayedArray", reverse = TRUE)
+cran_revdeps <- get_cran_deps("DelayedArray", db, reverse = TRUE)
+nodes <- bioc_revdeps %>%
+  dplyr::bind_rows(cran_revdeps) %>%
+  dplyr::select(-Dependency) %>%
+  tidyr::gather(key = id, value = package) %>%
+  dplyr::select(-id) %>%
+  dplyr::distinct() %>%
+  dplyr::mutate(
+    repo = dplyr::if_else(package %in% bpi$Package, "Bioconductor", "CRAN"))
+edges <- bioc_revdeps %>%
+  dplyr::bind_rows(cran_revdeps) %>%
+  dplyr::rename(from = package1, to = package2)
+graph <- tidygraph::tbl_graph(nodes = nodes, edges = edges)
+
+ggraph(graph, layout = "fr") +
+  geom_edge_fan(aes(colour = Dependency), check_overlap = FALSE) +
+  geom_node_label(aes(label = package), repel = TRUE) +
+  scale_edge_color_brewer(palette = "Dark2") +
+  theme_graph() + 
+  ggtitle("Packages that depend upon DelayedArray")
+```

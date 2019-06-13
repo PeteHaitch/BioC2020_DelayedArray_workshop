@@ -12,6 +12,8 @@ Imports:
   DelayedArray,
   TENxBrainData,
   DelayedMatrixStats,
-  bench
+  bench,
+  BiocPkgTools,
+  rmarkdown
 License: Artistic-2.0
 VignetteBuilder: knitr
