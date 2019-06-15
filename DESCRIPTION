@@ -17,6 +17,8 @@ Imports:
   rmarkdown,
   BiocStyle,
   TENxPBMCData,
-  EnsDb.Hsapiens.v86
+  EnsDb.Hsapiens.v86,
+  scater,
+  scran
 License: Artistic-2.0
 VignetteBuilder: knitr
