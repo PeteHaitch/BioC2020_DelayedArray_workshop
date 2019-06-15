@@ -775,6 +775,7 @@ sce <- TENxPBMCData::TENxPBMCData("pbmc4k")
 sce
 # NOTE: The counts data are stored in an HDF5 file.
 class(assay(sce, withDimnames = FALSE))
+# TODO: Convert assay data to TENxMatrix object?
 ```
 
 We'll also switch to use the gene symbols provided by 10x Genomics rather than referring to genes by their Ensembl IDs.
@@ -812,12 +813,10 @@ multiplot(
     ylab("Proportion of reads in mitochondrial genes"),
   cols = 2)
 
-# NOTE: We'll discard cells wit large mitochondrial proportions, using it as a
+# NOTE: We'll discard cells with large mitochondrial proportions, using it as a
 #       proxy for cell damage.
 high_mito <- isOutlier(sce$pct_counts_Mito, nmads = 3, type = "higher")
 sce <- sce[, !high_mito]
-
-# TODO: Remove mito outliers
 ```
 
 ### Examining gene expression
@@ -842,17 +841,23 @@ Namely, we want to avoid normalizing together cells with a large number of diffe
 We will use the `scran::quickCluster()` function to perform a clustering based on the principal component scores generated from the log-expression matrix.
 This principal component analysis (PCA) in turn uses an approximate singular value decomposition (SVD) with the augmented implicitly Lanczos bidiagonalization algorithm (**irlba**).
 If that all sounds rather complicated, then don't worry: that's the point of this example!
-We are able to seamlessly apply these cutting edge techniques to our HDF5-backed data.
+We are able to seamlessly apply these cutting edge techniques to our HDF5-backed data^[For the sake of time, we're going to cheat by loading the counts matrix into memory as a sparse matrix and computing the clustering using the in-memory data. But this functionality does work, albeit more slowly, for the HDF5-backed data.].
 
 ```{r}
 library(scran)
 set.seed(1000)
-# TODO: This takes a few minutes; is that a problem?
 clusters <- quickCluster(
-  sce,
+  # NOTE: We're gonna cheat here to save time. 
+  #       We'll load the counts into memory as a sparse matrix and compute the 
+  #       clustering on that.
+  #       To run on the HDF5-backed data, simply use `x = sce` (this took > 30 
+  #       minutes on my laptop). 
+  x = as(counts(sce, withDimnames = FALSE), "dgCMatrix"),
   use.ranks = FALSE, 
-  BSPARAM = BiocSingular::IrlbaParam(deferred = TRUE))
+  BSPARAM = BiocSingular::IrlbaParam())
 table(clusters)
+# TODO: Step through quickCluster with the HDF5-backed data to figure out why 
+#       it's so slow.
 ```
 
 Following the clustering, we apply the deconvolution method to compute size factors for all cells (**TODO:** Citation Lun, Bach, and Marioni 2016).
@@ -864,11 +869,101 @@ sce <- computeSumFactors(sce, min.mean = 0.1, cluster = clusters)
 plot(sce$total_counts, sizeFactors(sce), log = "xy")
 ```
 
+Finally, we compute normalized log-expression values from the count data using the size factors we just computed.
+Normalized expression values are computed by dividing the counts for each cell by the size factor for that cell.
+
+```{r}
+sce <- normalize(sce)
+logcounts(sce)
+```
+
+This is a near instantaneous because it is a delayed operation operating on the counts matrix!
+
+```{r}
+showtree(logcounts(sce, withDimnames = FALSE))
+# THe counts and logcounts assays share the same seed.
+seed(counts(sce))
+seed(logcounts(sce))
+```
+
 ### Modellng the mean-variance trend
+
+We'll use the `scran::makeTechTrend()` function to model the technical variation of the counts matrix as Poisson noise.
+**TODO:** Describe DA operations of this method.
+
+```{r}
+tech_trend <- makeTechTrend(x = sce)
+```
+
+**TODO:** Describe this next step.
+
+```{r}
+fit <- trendVar(sce, use.spikes = FALSE, loess.args = list(span = 0.05))
+fit$trend <- tech_trend
+```
+
+We decompose the variance for each gene using the Poisson-based trend, and examine the genes with the highest biological components.
+
+```{r}
+dec <- decomposeVar(fit = fit)
+```
+
+We can plot the genes with the largest biological components, to verify that they are indeed highly variable (Figure 8).
+**TODO:** Describe DA operations of this method.
+
+```{r}
+top_dec <- dec[order(dec$bio, decreasing = TRUE), ] 
+plotExpression(sce, features = rownames(top_dec)[1:10])
+```
 
 ### Dimensionality reduction
 
+To finish this example analysis, we'll create the *de rigueur* $t$-SNE plot.
+The first step is to perform a PCA of the log-expression matrix.
+This denoises the log-expression data by removing principal components corresponding to technical noise
+
+**TODO:** Reiterate that this works for HDF5-backed data^[Again, for the sake of time, we're going to cheat by loading the log-expression matrix into memory as a sparse matrix and computing the PCA using the in-memory data. But this functionality does work, albeit more slowly, for the HDF5-backed data.].
+
+```{r}
+set.seed(1000)
+pcs <- denoisePCA(
+  # NOTE: We're gonna cheat here to save time. 
+  #       We'll load the log-expression matrix into memory as a sparse matrix 
+  #       and compute the PCA on that.
+  #       To run on the HDF5-backed data, simply use `x = logcounts(sce)` 
+  #       (which will return the PCs an ordinary matrix) or `x = sce` (which 
+  #       will return a SingleCellExperiment that is a modified version of 
+  #       `sce` containing the PCs as an ordinary matrix as the "PCA" entry in 
+  #       the reducedDims slot).
+  # TODO: How long did this take to do 'properly' on my laptop?
+  x = as(logcounts(sce, withDimnames = FALSE), "dgCMatrix"),
+  technical = tech_trend,
+  BSPARAM = BiocSingular::IrlbaParam())
+# NOTE: Store the PCs in the SingleCellExperiment.
+reducedDim(sce, "PCA") <- pcs
+```
+
+We can now compute a $t$-SNE representation of the data and plot it.
+
+```{r}
+set.seed(1000)
+sce <- runTSNE(sce, use_dimred = "PCA", perplexity = 30)
+# TODO: Colour tSNE by an interesting gene.
+plotTSNE(sce, colour_by = "CCL5")
+```
+
 ### Summary
+
+This analysis demonstrated that
+
+- standard tools works with HDF5-backed data
+- Pain points
+- Once you've got PCA you're home and hosed.
+
+Regardless of whether the log-expression data are in-memory or on-disk, the PCs are stored in-memory as an ordinary matrix.
+This means that downstream steps, such as computing the $t$-SNE co-ordinates and clustering, are fast because they use this 
+
+which means that computing the $t$-SNE takes the same amount of time.s
 
 ### Things to include
 
