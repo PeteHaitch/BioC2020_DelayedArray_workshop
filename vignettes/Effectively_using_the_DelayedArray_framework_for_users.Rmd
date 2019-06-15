@@ -79,7 +79,7 @@ There will be opportunities throughout the workshop for questions and discussion
 - Identify when an object is a *DelayedArray* or one of its derivatives.
 - Be able to recognise when it is useful to use a *DelayedArray* instead of an ordinary array or other array-like data structure.
 - Learn how to load and save a DelayedArray-backed object.
-- Learn how the 'block size' and 'chunking' of the data set affect performance when operating on *DelayedArray* objects.
+- Learn how the 'block size' and 'chunking' of the dataset affect performance when operating on *DelayedArray* objects.
 - Take away some miscellaneous tips and tricks I've learnt over the years when working with DelayedArray-backed objects.
 
 ## Introductory material (10 mins)
@@ -138,7 +138,7 @@ tenx
 
 The data are stored in a *SingleCellExperiment* object, an extension of the *SummarizedExperiment* class.
 With data from 1.3 million cells, this is roughly 100,000-times more samples
-than a typical bulk RNA-seq data set and would occupy 146 GB in-memory if stored as an ordinary *matrix*.
+than a typical bulk RNA-seq dataset and would occupy 146 GB in-memory if stored as an ordinary *matrix*.
 
 We might expect that interacting with an object containing this many samples would feel sluggist, but this is not the case.
 For example, we can efficiently subset the object.
@@ -391,7 +391,7 @@ showtree(val)
 ### Block-processing
 
 In [Library sizes], we needed to compute the column sums of `tenx_counts_subset`, whose data live on disk in an HDF5 file.
-One way of achieving this would be to load the entire data set into memory as an ordinary matrix and then run `base::colSums()`^[Here, I use the 'namespaced function' notation for didactic purposes to distinguish `base::colSums()` from the S4 generic `colSums()` and its associated methods. When writing code, however, it is generally not necessary to use the `package::function()` notation, except for all the times that it is ...].
+One way of achieving this would be to load the entire dataset into memory as an ordinary matrix and then run `base::colSums()`^[Here, I use the 'namespaced function' notation for didactic purposes to distinguish `base::colSums()` from the S4 generic `colSums()` and its associated methods. When writing code, however, it is generally not necessary to use the `package::function()` notation, except for all the times that it is ...].
 
 ```{r}
 lib_sizes_in_mem <- colSums(as.array(tenx_counts_subset))
@@ -730,14 +730,14 @@ Implements the mini-batch k-means algorithm for large datasets, including suppor
 
 A collection of tools for analyzing and visualizing bisulfite sequencing data.
 This was one of the first packages to make use of the DelayedArray framework and it supports these throughout the package.
-This was needed in order to store and analyse large non-CpG methylation data sets  (> 300 million loci, hundreds of samples) using HDF5 files.
+This was needed in order to store and analyse large non-CpG methylation datasets  (> 300 million loci, hundreds of samples) using HDF5 files.
 Disclaimer: I did this re-write of `r BiocStyle::Biocpkg("bsseq")` and learnt a lot along the way.
 
 #### `r BiocStyle::Biocpkg("minfi")`
 
 Tools to analyze & visualize Illumina Infinium methylation arrays.
 This doesn't have the same level of support for *DelayedMatrix* objects as `r BiocStyle::Biocpkg("bsseq")`, but perhaps one day.
-This is needed in order to store and analyse large methylation data sets (> 850,000 loci, tens of thousands of) using HDF5 files.
+This is needed in order to store and analyse large methylation datasets (> 850,000 loci, tens of thousands of) using HDF5 files.
 Disclaimer: This was the second package, after `r BiocStyle::Biocpkg("bsseq")`, I started to re-write to support the DelayedArray framework.
 Here, it is rather more difficult because it is a 'widely' used package and has code from lots of different authors with different styles.
 
@@ -757,17 +757,131 @@ Ordinary matrices and several sparse/dense `r BiocStyle::CRANpkg("Matrix")` clas
 
 ## Real world encounters with DelayedArray (20 mins)
 
-- Take a 10x data set in TENxMatrix format.
+We will perform a brief analysis of a peripheral blood mononuclear cell (PBMC) scRNA-seq dataset from 10X Genomics (Zheng et al. 2017) to illustrate a real world analysis that makes use of the DelayedArray framework^[This is adapted from the `r BiocStyle::Biocpkg("simpleSingleCell")` workflow.].
+
+This dataset contains more than 4000 cells, which isn't that large in the grand scheme of things, but does allow us to demonstrate some important concepts in a workshop format.
+It has been pre-packaged and is available from the `r BiocStyle::Biocpkg("TENxPBMCData")` package as a *SingleCellExperiment* object with a *HDF5Matrix* in the counts assay.
+In order to efficiently analyse this data, we would like to use software that supports the *HDF5Matrix* class via the DelayedArray framework.
+Thanks to the tireless efforts of Aaron Lun, this is true of many of the key Bioconductor packages for analysing scRNA-seq data: `r BiocStyle::Biocpkg("DropletUtils")`, `r BiocStyle::Biocpkg("scater")`, `r BiocStyle::Biocpkg("scran")`, and `r BiocStyle::Biocpkg("BiocSingular")`.
+
+#### Loading the data
+
+A typical analysis of a 10x Genomics dataset would start by using the `DropletUtils::read10xCounts()` function to load the output of 10x Genomics' CellRanger software into R.
+One of these outputs is an HDF5 file, which `DropletUtils::read10xCounts()` can read and return as an HDF5-backed *DelayedMatrix*.
+For this workshop, we'll use one we prepared earlier and simply load the 'filtered' dataset from the `r BiocStyle::Biocpkg("TENxPBMCData")` package. 
+
+```{r}
+sce <- TENxPBMCData::TENxPBMCData("pbmc4k")
+sce
+# NOTE: The counts data are stored in an HDF5 file.
+class(assay(sce, withDimnames = FALSE))
+```
+
+We'll also switch to use the gene symbols provided by 10x Genomics rather than referring to genes by their Ensembl IDs.
+
+```{r}
+library(scater)
+rownames(sce) <- uniquifyFeatureNames(
+  rowData(sce)$ENSEMBL_ID,
+  rowData(sce)$Symbol_TENx)
+```
+
+#### Quality control on the cells
+
+After loading the data into R, we compute some quality control metrics of the data using `scater::calculateQCMetrics()`.
+Under the hood, this involves computing column sums, comparisons of values, and subsetting of the HDF5-backed count matrix, all seamlessly handled by this function.
+
+```{r}
+# NOTE: Need to know which genes are mitochondrial to perform QC.
+library(EnsDb.Hsapiens.v86)
+location <- mapIds(
+  EnsDb.Hsapiens.v86,
+  keys = rowData(sce)$ENSEMBL_ID, 
+  column = "SEQNAME", 
+  keytype = "GENEID")
+is_mito <- location == "MT"
+
+library(scater)
+sce <- calculateQCMetrics(sce, feature_controls = list(Mito = which(is_mito)))
+multiplot(
+  plotColData(sce, "log10_total_counts") + 
+    ylab("Log-total UMI count"),
+  plotColData(sce, "total_features_by_counts") + 
+    ylab("Log-total number of expressed features"),
+  plotColData(sce, "pct_counts_Mito") +
+    ylab("Proportion of reads in mitochondrial genes"),
+  cols = 2)
+
+# NOTE: We'll discard cells wit large mitochondrial proportions, using it as a
+#       proxy for cell damage.
+high_mito <- isOutlier(sce$pct_counts_Mito, nmads = 3, type = "higher")
+sce <- sce[, !high_mito]
+
+# TODO: Remove mito outliers
+```
+
+### Examining gene expression
+
+We can make a plot of the distribution of the most highly expressed genes using `scater::plotHighestExprs()`.
+Under the hood, this involves computing row and column sums of the HDF5-backed count matrix.
+Again, this is seamlessly handled by this function.
+
+```{r}
+plotHighestExprs(sce)
+```
+
+### Normalization
+
+Let's move onto something a little more computationally challenging.
+Proper normalization is essential for all analyses of gene expression data.
+We apply the deconvolution method of Lun, Bach, and Marioni (2016) to compute size factors for all cells.
+
+For highly heterogeneous datasets, like this sample of PBMCs, it is advisable to perform a rough clustering of the cells to better satisfy the assumptions of this normalization method.
+Namely, we want to avoid normalizing together cells with a large number of differentially expressed genes between them.
+
+We will use the `scran::quickCluster()` function to perform a clustering based on the principal component scores generated from the log-expression matrix.
+This principal component analysis (PCA) in turn uses an approximate singular value decomposition (SVD) with the augmented implicitly Lanczos bidiagonalization algorithm (**irlba**).
+If that all sounds rather complicated, then don't worry: that's the point of this example!
+We are able to seamlessly apply these cutting edge techniques to our HDF5-backed data.
+
+```{r}
+library(scran)
+set.seed(1000)
+# TODO: This takes a few minutes; is that a problem?
+clusters <- quickCluster(
+  sce,
+  use.ranks = FALSE, 
+  BSPARAM = BiocSingular::IrlbaParam())
+table(clusters)
+```
+
+Following the clustering, we apply the deconvolution method to compute size factors for all cells (**TODO:** Citation Lun, Bach, and Marioni 2016).
+**TODO:** Describe DA operations of this method.
+
+```{r}
+sce <- computeSumFactors(sce, min.mean = 0.1, cluster = clusters)
+# The size factors are well correlated with library sizes.
+plot(sce$total_counts, sizeFactors(sce), log = "xy")
+```
+
+### Modellng the mean-variance trend
+
+### Dimensionality reduction
+
+### Summary
+
+### Things to include
+
+- Take a 10x dataset in TENxMatrix format.
+  - Have to use HDF5Matrix format (see https://github.com/MarioniLab/DropletUtils/issues/15)
 
 - Feature some of the cools things Aaron has been doing with DA
   - DeferredMatrix
   - LowRankMatrix
   - beachmat
   - Deferred PCA
-  
-- RleArray and GPos
 
-## Workflow for DelayedArray-backed analyses (20 mins)
+## Workflow tips for DelayedArray-backed analyses (20 mins)
 
 - Saving and loading DA- and HDF5A-backed objects
 - Writing functions that 'consume' DAs
@@ -797,10 +911,15 @@ bench::mark(
 knitr::knit_exit()
 ```
 
+## Concluding remarks
+
+**TODO:** Necessary?
+
 ## TODOs
 
 - [ ] Update block-processing figures because code has changed. 
-- [ ] Find a 10x data set in TENxData format
+- [x] Find a 10x dataset in TENxData format
+- [ ] Get correct citation for Zheng.
 
 ```{r, echo = FALSE, eval = FALSE}
 # NOTE: This is a lot of code to generate a graph containing little information.
@@ -909,3 +1028,60 @@ ggraph(graph, layout = "fr") +
   theme_graph() + 
   ggtitle("Packages that depend upon DelayedArray")
 ```
+
+## OLD STUFF
+
+
+```{r write10x, echo = FALSE}
+# NOTE: We'll need to re-create the process of loading the CellRanger output 
+#       into SingleCellExperiment object. To do so, we'll take a subset of the 
+#       `tenx` object and write it to disk in the CellRanger HDF5 output format.
+#       A reminder: you wouldn't do this in a 'real' data analysis! It's just 
+#       to create a dataset for our workshop.].
+# TODO: Include this code chunk in the 'appendix'.
+tenx_subset <- tenx[, 1:1000]
+DropletUtils::write10xCounts(
+  path = tenx_path,
+  x = counts(tenx_subset),
+  gene.id = rowData(tenx_subset)$Ensembl,
+  type = "HDF5",
+  version = "3")
+```
+
+```{r, eval = FALSE, echo = FALSE}
+# TODO: This doesn't make an HDF5 file in the CellRanger output format.
+library(DropletUtils)
+tenx_path <- tempfile("tenx_subset", fileext = ".h5")
+pbmc4k <- TENxPBMCData::TENxPBMCData("pbmc4k")
+writeTENxMatrix(counts(pbmc4k, withDimnames = FALSE), tenx_path, group = "pbmc4k", verbose = TRUE)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+# TODO: This doesn't produce a TENxMatrix when loading in with read10xCounts().
+#       See https://github.com/MarioniLab/DropletUtils/issues/15.
+library(DropletUtils)
+
+tenx_path <- tempfile("tenx_subset", fileext = ".h5")
+pbmc4k <- TENxPBMCData::TENxPBMCData("pbmc4k")
+write10xCounts(
+  path = tenx_path,
+  x = counts(pbmc4k, withDimnames = FALSE),
+  barcodes = pbmc4k$Barcode,
+  gene.id = rowData(pbmc4k)$ENSEMBL_ID,
+  type = "HDF5",
+  version = "3",
+  genome = "matrix")
+rhdf5::h5ls(tenx_path)
+pbmc4k_colData <- colData(pbmc4k)
+```
+
+The `DropletUtils::read10xCounts()` function can load the output of the **CellRanger** software into R.
+Here we will use it to load the CellRanger 'filtered' HDF5 output file into a *TENxMatrix* object which is then wrapped up in a *SingleCellExperiment*.
+
+```{r}
+sce <- read10xCounts(tenx_path)
+# NOTE: We include the sample metadata back in.
+colData(sce) <- pbmc4k_colData
+sce
+```
+
