@@ -783,7 +783,7 @@ Thanks to the tireless efforts of Aaron Lun, this is true of many of the key Bio
 #### Loading the data
 
 A typical analysis of a 10x Genomics dataset would start by using the `DropletUtils::read10xCounts()` function to load the output of 10x Genomics' CellRanger software into R.
-One of these outputs is an HDF5 file, which `DropletUtils::read10xCounts()` can read and return as a *TENxMatrix*, an HDF5-backed *DelayedMatrix*.
+One of the CellRanger outputs is an HDF5 file, which `DropletUtils::read10xCounts()` can read and return as a *TENxMatrix*, an HDF5-backed *DelayedMatrix*.
 For this workshop, we'll use one we prepared earlier and simply load the 'filtered' dataset from the `r BiocStyle::Biocpkg("TENxPBMCData")` package which stores the count data in an *HDF5Matrix*.
 
 ```{r}
@@ -871,11 +871,6 @@ clusters <- quickCluster(
   use.ranks = FALSE, 
   BSPARAM = BiocSingular::IrlbaParam())
 table(clusters)
-# TODO: Stepping through quickCluster with the HDF5-backed data to figure out why 
-#       it's so slow (running on unix311).
-#       Right now, I can't figure it out. It worked fast when stepping through 
-#       with DelayedArray:::set_verbose_processing(FALSE) but is slow with 
-#       DelayedArray::set_verbose_processing(TRUE).
 ```
 
 Following the clustering, we apply the deconvolution method to compute size factors for all cells [@lun2016pooling].
@@ -914,10 +909,11 @@ fit$trend <- tech_trend
 dec <- decomposeVar(fit = fit)
 ```
 
-We can then perform a principal component analysis (PCA) of the log-expression matrix to create a reduced dimension representation of the data.
-We also denoise the log-expression data by removing PCs corresponding to technical noise.
+We can then perform a principal component analysis (PCA) of the log-expression matrix to create a representation of the data using fewer dimensions.
+In doing so, we also denoise the log-expression data by removing PCs corresponding to technical noise.
 
-**TODO:** Reiterate that this works for HDF5-backed data^[Again, for the sake of time, we're going to cheat by loading the log-expression matrix into memory as a sparse matrix and computing the PCA using the in-memory data. But this functionality does work, albeit more slowly, for the HDF5-backed data.].
+In the interests of time, we are again going to cheat by loading the log-expression matrix into memory as a sparse matrix before doing the PCA.
+However, the same function works on the HDF5-backed data, albeit more slowly than when applied to an in-memory version of the data.
 
 ```{r}
 set.seed(1000)
@@ -930,7 +926,6 @@ pcs <- denoisePCA(
   #       will return a SingleCellExperiment that is a modified version of 
   #       `sce` containing the PCs as an ordinary matrix as the "PCA" entry in 
   #       the reducedDims slot).
-  # TODO: Figure out where/why this takes so long with `x = sce`.
   x = as(logcounts(sce, withDimnames = FALSE), "dgCMatrix"),
   technical = tech_trend,
   BSPARAM = BiocSingular::IrlbaParam())
@@ -938,39 +933,45 @@ pcs <- denoisePCA(
 reducedDim(sce, "PCA") <- pcs
 ```
 
-### Summary
+### Clustering and visualization
 
-This analysis demonstrated that ... 
+Our *SingleCellExperiment* object now contains:
 
-- standard tools works with HDF5-backed data
-- Pain points
-- Once you've got PCA you're home and hosed.
+1. The counts matrix: stored on disk in an HDF5 file and wrapped in a *DelayedMatrix*.
+2. The normalized log-expression matrix: represented by a *DelayedMatrix* as delayed operations on top of the counts matrix.
+3. The principal components (PCs): stored in-memory as an ordinary matrix
 
-Regardless of whether the log-expression data are in-memory or on-disk, the PCs are stored in-memory as an ordinary matrix.
-This means that downstream steps, such as computing the $t$-SNE co-ordinates and clustering, are fast because they use this 
-
-which means that computing the $t$-SNE takes the same amount of time.s
-
-#### t-SNE
-
-We can now compute a $t$-SNE representation of the data and plot it.
+The key at this point is that PCs are stored in-memory.
+Much of the downstream analysis makes use of this representation rather than the counts or log-expression matrices.
+In particular, we demonstrate that we can perform a clustering and $t$-SNE representation of the data.
 
 ```{r}
+# Clustering
+snn_gr <- buildSNNGraph(sce, use.dimred = "PCA")
+clusters <- igraph::cluster_walktrap(snn_gr)
+sce$Cluster <- factor(clusters$membership)
+table(sce$Cluster)
+
+# t-SNE
 set.seed(1000)
 sce <- runTSNE(sce, use_dimred = "PCA", perplexity = 30)
-# TODO: Colour tSNE by an interesting gene.
-plotTSNE(sce, colour_by = "CCL5")
+
+# Visualize clustering on t-SNE plot.
+plotTSNE(sce, colour_by = "Cluster")
 ```
 
-### Things to include
+### Concluding remarks
 
-- Feature some of the cools things Aaron has been doing with DA
-  - DeferredMatrix?
-  - LowRankMatrix?
-  - beachmat
-  - Deferred PCA
+This analysis illustrates that we can analyse scRNA-seq data that is stored on disk using tools that leverage the DelayedArray framework.
+More importantly, the same functions and workflow apply regardless of how the data are stored.
+
+The biggest discrepency in performance is when performing the principal component analysis of the data.
+However, by trading off additional computational time for reduced memory requirements, this is fully achievable and the results can be saved for downstream analysis.
+This puts the DelayedArray-backed analysis on par with a fully in-memory-based analysis and with the advantage of a reduced in-memory footprint.
 
 ## Workflow tips for DelayedArray-backed analyses (10 mins)
+
+**TODO:** Write this final section.
 
 - Saving and loading DA- and HDF5A-backed objects
 - Writing functions that 'consume' DAs
