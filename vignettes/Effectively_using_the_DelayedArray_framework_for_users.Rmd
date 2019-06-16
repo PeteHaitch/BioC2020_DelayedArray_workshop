@@ -111,10 +111,15 @@ It is now not uncommon to collect $10,000-100,000,000$ measurements on $100 - 1,
 
 ### Things DA has enabled
 
-**TODO:** 5 mins tops
-- Nature Neuro
-- eGTEx
-- 10x analysis on a laptop
+The DelayedArray framework enables the analysis of datasets that are too large to be stored or processed in-memory.
+This has become particularly relevant with the advent of large single-cell RNA-sequencing (scRNA-seq) studies containing tens of thousands to millions of cells.
+
+In my own research I have made extensive use of the DelayedArray framework when analysing whole genome bisulfite sequencing (WGBS) data sets.
+To give a recent example, we profiled 45 human brain samples using WGBS to measure DNA methylation [@rizzardi2019neuronal].
+For most tissues, we focus on so-called so-called CpG methylation, which requires analysing matrices with roughly 20 million rows (CpG loci) and 45 columns (samples).
+This sized data is challenging, but well within the realms of a high performance computing available at a modern research institute.
+However, the brain also has extensive non-CpG methylation and there are is an order of magnitude more non-CpG loci.
+This necessitated extensive re-factoring of our software tools and we successfully adopted the DelayedArray framework to enable this research.
 
 ## First contact (40 mins)
 
