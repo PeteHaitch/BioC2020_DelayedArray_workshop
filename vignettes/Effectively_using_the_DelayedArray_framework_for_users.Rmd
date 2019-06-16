@@ -1,4 +1,7 @@
 ---
+title: "Effectively using the DelayedArray framework as a user to support the analysis of large datasets"
+author: "Peter Hickey"
+bibliography: "`r system.file(package = 'DelayedArrayWorkshop', 'vignettes', 'ref.bib')`"
 output:
   rmarkdown::html_document:
    highlight: pygments
@@ -21,17 +24,17 @@ knitr::opts_chunk$set(
 
 BioC 2019: 24-27 June
 
-## Instructors
-
-- Peter Hickey (hickey@wehi.edu.au)
-
 ## Workshop description
 
 This workshop gives an introductory overview of the DelayedArray framework, which can be used by Bioconductor packages to support the analysis of large datasets.
 A *DelayedArray* is like an ordinary array in R, but allows for the data to be in-memory^[Including space-efficient formats like sparse arrays and run length encoded arrays], on-disk in a file, or even hosted on a remote server.
 Participants will learn where they might encounter a *DelayedArray* in the wild while using Bioconductor and help them understand the fundamental concepts underlying the framework.
 This workshop will be a mixture of lecture with example code and discussion.
-Examples will mostly be drawn from the analysis of single-cell RNA-sequencing data, as well as whole-genome bisulfite sequencing and coverage-based assays like ATAC-seq and ChIP-seq.
+Examples will mostly be drawn from the analysis of single-cell RNA-sequencing data.
+
+### Instructor
+
+- Peter Hickey (hickey@wehi.edu.au)
 
 ### Pre-requesites
 
@@ -47,12 +50,14 @@ There will be opportunities throughout the workshop for questions and discussion
 
 ### _R_ / _Bioconductor_ packages used
 
-**TODO:** Once written, go through material and add here (with links).
-
-- DelayedArray
-- HDF5Array
-- DelayedMatrixStats
-- TENxBrainData
+- `r BiocStyle::Biocpkg("DelayedArray")`
+- `r BiocStyle::Biocpkg("HDF5Array")`
+- `r BiocStyle::Biocpkg("DelayedMatrixStats")`
+- `r BiocStyle::Biocpkg("TENxBrainData")`
+- `r BiocStyle::Biocpkg("TENxPBMCData")`
+- `r BiocStyle::Biocpkg("BiocSingular")`
+- `r BiocStyle::Biocpkg("scater")`
+- `r BiocStyle::Biocpkg("scran")`
 
 ### Time outline
 
@@ -61,8 +66,8 @@ There will be opportunities throughout the workshop for questions and discussion
 | Introductory material                           | 10m  |
 | First contact                                   | 40m  |
 | Package ecosystem                               | 10m  |
-| Real world encounters                           | 20m  |
-| Workflow tips for DelayedArray-backed analyses  | 20m  |
+| Real world encounters analysing scRNA-seq data  | 30m  |
+| Workflow tips for DelayedArray-backed analyses  | 10m  |
 
 ### Workshop goals and objectives
 
@@ -104,8 +109,9 @@ Traditionally, the assay data are stored in-memory as an ordinary *array* object
 Storing the data in-memory becomes a real pain with the ever-growing size of 'omics datasets.
 It is now not uncommon to collect $10,000-100,000,000$ measurements on $100 - 1,000,000$ samples, which would occupy $10-1,000$ gigabytes (GB) if stored in-memory as ordinary R arrays.
 
-### Things DA has enabled (5 mins)
+### Things DA has enabled
 
+**TODO:** 5 mins tops
 - Nature Neuro
 - eGTEx
 - 10x analysis on a laptop
@@ -117,7 +123,7 @@ These data are available in the `r BiocStyle::Biocpkg("TENxBrainData")` Biocondu
 
 ```{r, message = FALSE}
 library(DelayedArray)
-# NOTE: This option is for didactic purposes.
+# NOTE: We'll turn off parallelisation for didactic purposes.
 setAutoBPPARAM(SerialParam())
 
 # NOTE: The TENxBrainData package loads and attaches the HDF5Array package, 
@@ -138,9 +144,9 @@ tenx
 
 The data are stored in a *SingleCellExperiment* object, an extension of the *SummarizedExperiment* class.
 With data from 1.3 million cells, this is roughly 100,000-times more samples
-than a typical bulk RNA-seq dataset and would occupy 146 GB in-memory if stored as an ordinary *matrix*.
+than a typical bulk RNA-seq dataset and would occupy 146 GB in-memory if stored as an ordinary *matrix*!
 
-We might expect that interacting with an object containing this many samples would feel sluggist, but this is not the case.
+We might expect that interacting with an object containing this many samples would feel sluggish, but this is not the case.
 For example, we can efficiently subset the object.
 
 ```{r}
@@ -237,7 +243,7 @@ summary(median_expression)
 
 #### Summary
 
-These 3 examples highlight the power of the DelayedArray framework
+These 3 examples highlight the power of the DelayedArray framework.
 Recall that the data in these examples live on disk in an HDF5 file, yet we interacted with `tenx_counts_subset` and computed on it much as we would if the data were in-memory as an ordinary matrix.
 Also note that all 3 examples returned ordinary R vectors.
 
@@ -384,6 +390,11 @@ But it can be fooled.
 ```{r}
 # NOTE: This is a no-op but DelayedArray doesn't recognise it as one.
 val <- tenx_counts + 0L
+val
+showtree(val)
+
+# NOTE: This also a no-op but DelayedArray doesn't recognise it as one.
+val <- cbind(tenx_counts)
 val
 showtree(val)
 ```
@@ -755,9 +766,9 @@ Disclaimer: I wrote this one, too.
 Provides a consistent C++ class interface for reading from and writing data to a variety of commonly used matrix types.
 Ordinary matrices and several sparse/dense `r BiocStyle::CRANpkg("Matrix")` classes are directly supported, third-party S4 classes may be supported by external linkage (such as the *HDF5Matrix* class), while all other matrices are handled by DelayedArray block processing.
 
-## Real world encounters with DelayedArray (20 mins)
+## Real world encounter with DelayedArray analysing scRNA-seq dat (30 mins)
 
-We will perform a brief analysis of a peripheral blood mononuclear cell (PBMC) scRNA-seq dataset from 10X Genomics (Zheng et al. 2017) to illustrate a real world analysis that makes use of the DelayedArray framework^[This is adapted from the `r BiocStyle::Biocpkg("simpleSingleCell")` workflow.].
+We will perform a brief analysis of a peripheral blood mononuclear cell (PBMC) scRNA-seq dataset from 10X Genomics [@zheng2017massively] to illustrate a real world analysis that makes use of the DelayedArray framework^[This is adapted from the `r BiocStyle::Biocpkg("simpleSingleCell")` workflow.].
 
 This dataset contains more than 4000 cells, which isn't that large in the grand scheme of things, but does allow us to demonstrate some important concepts in a workshop format.
 It has been pre-packaged and is available from the `r BiocStyle::Biocpkg("TENxPBMCData")` package as a *SingleCellExperiment* object with a *HDF5Matrix* in the counts assay.
@@ -767,15 +778,14 @@ Thanks to the tireless efforts of Aaron Lun, this is true of many of the key Bio
 #### Loading the data
 
 A typical analysis of a 10x Genomics dataset would start by using the `DropletUtils::read10xCounts()` function to load the output of 10x Genomics' CellRanger software into R.
-One of these outputs is an HDF5 file, which `DropletUtils::read10xCounts()` can read and return as an HDF5-backed *DelayedMatrix*.
-For this workshop, we'll use one we prepared earlier and simply load the 'filtered' dataset from the `r BiocStyle::Biocpkg("TENxPBMCData")` package. 
+One of these outputs is an HDF5 file, which `DropletUtils::read10xCounts()` can read and return as a *TENxMatrix*, an HDF5-backed *DelayedMatrix*.
+For this workshop, we'll use one we prepared earlier and simply load the 'filtered' dataset from the `r BiocStyle::Biocpkg("TENxPBMCData")` package which stores the count data in an *HDF5Matrix*.
 
 ```{r}
 sce <- TENxPBMCData::TENxPBMCData("pbmc4k")
 sce
-# NOTE: The counts data are stored in an HDF5 file.
+# NOTE: The counts data are stored in an HDF5Matrix.
 class(assay(sce, withDimnames = FALSE))
-# TODO: Convert assay data to TENxMatrix object?
 ```
 
 We'll also switch to use the gene symbols provided by 10x Genomics rather than referring to genes by their Ensembl IDs.
@@ -856,17 +866,18 @@ clusters <- quickCluster(
   use.ranks = FALSE, 
   BSPARAM = BiocSingular::IrlbaParam())
 table(clusters)
-# TODO: Step through quickCluster with the HDF5-backed data to figure out why 
-#       it's so slow.
+# TODO: Stepping through quickCluster with the HDF5-backed data to figure out why 
+#       it's so slow (running on unix311).
+#       Right now, I can't figure it out. It worked fast when stepping through 
+#       with DelayedArray:::set_verbose_processing(FALSE) but is slow with 
+#       DelayedArray::set_verbose_processing(TRUE).
 ```
 
-Following the clustering, we apply the deconvolution method to compute size factors for all cells (**TODO:** Citation Lun, Bach, and Marioni 2016).
-**TODO:** Describe DA operations of this method.
+Following the clustering, we apply the deconvolution method to compute size factors for all cells [@lun2016pooling].
+Under the hood, this involves computing column subs,  of the HDF5-backed count matrix.
 
 ```{r}
 sce <- computeSumFactors(sce, min.mean = 0.1, cluster = clusters)
-# The size factors are well correlated with library sizes.
-plot(sce$total_counts, sizeFactors(sce), log = "xy")
 ```
 
 Finally, we compute normalized log-expression values from the count data using the size factors we just computed.
@@ -874,53 +885,32 @@ Normalized expression values are computed by dividing the counts for each cell b
 
 ```{r}
 sce <- normalize(sce)
+# NOTE: Normalized counts are available in the 'logcounts' assay.
 logcounts(sce)
 ```
 
-This is a near instantaneous because it is a delayed operation operating on the counts matrix!
+This final step is near instantaneous because it is a delayed operation on the counts matrix.
 
 ```{r}
 showtree(logcounts(sce, withDimnames = FALSE))
-# THe counts and logcounts assays share the same seed.
+# The counts and logcounts assays share the same seed.
 seed(counts(sce))
 seed(logcounts(sce))
 ```
 
-### Modellng the mean-variance trend
+### Dimensionality reduction
 
-We'll use the `scran::makeTechTrend()` function to model the technical variation of the counts matrix as Poisson noise.
-**TODO:** Describe DA operations of this method.
+Skipping over the details, we use functions from the `r BiocStyle::Biocpkg("scran")` package to decompose the variation in the log-expression matrix to a technical and biological component.
 
 ```{r}
 tech_trend <- makeTechTrend(x = sce)
-```
-
-**TODO:** Describe this next step.
-
-```{r}
 fit <- trendVar(sce, use.spikes = FALSE, loess.args = list(span = 0.05))
 fit$trend <- tech_trend
-```
-
-We decompose the variance for each gene using the Poisson-based trend, and examine the genes with the highest biological components.
-
-```{r}
 dec <- decomposeVar(fit = fit)
 ```
 
-We can plot the genes with the largest biological components, to verify that they are indeed highly variable (Figure 8).
-**TODO:** Describe DA operations of this method.
-
-```{r}
-top_dec <- dec[order(dec$bio, decreasing = TRUE), ] 
-plotExpression(sce, features = rownames(top_dec)[1:10])
-```
-
-### Dimensionality reduction
-
-To finish this example analysis, we'll create the *de rigueur* $t$-SNE plot.
-The first step is to perform a PCA of the log-expression matrix.
-This denoises the log-expression data by removing principal components corresponding to technical noise
+We can then perform a principal component analysis (PCA) of the log-expression matrix to create a reduced dimension representation of the data.
+We also denoise the log-expression data by removing PCs corresponding to technical noise.
 
 **TODO:** Reiterate that this works for HDF5-backed data^[Again, for the sake of time, we're going to cheat by loading the log-expression matrix into memory as a sparse matrix and computing the PCA using the in-memory data. But this functionality does work, albeit more slowly, for the HDF5-backed data.].
 
@@ -935,7 +925,7 @@ pcs <- denoisePCA(
   #       will return a SingleCellExperiment that is a modified version of 
   #       `sce` containing the PCs as an ordinary matrix as the "PCA" entry in 
   #       the reducedDims slot).
-  # TODO: How long did this take to do 'properly' on my laptop?
+  # TODO: Figure out where/why this takes so long with `x = sce`.
   x = as(logcounts(sce, withDimnames = FALSE), "dgCMatrix"),
   technical = tech_trend,
   BSPARAM = BiocSingular::IrlbaParam())
@@ -943,18 +933,9 @@ pcs <- denoisePCA(
 reducedDim(sce, "PCA") <- pcs
 ```
 
-We can now compute a $t$-SNE representation of the data and plot it.
-
-```{r}
-set.seed(1000)
-sce <- runTSNE(sce, use_dimred = "PCA", perplexity = 30)
-# TODO: Colour tSNE by an interesting gene.
-plotTSNE(sce, colour_by = "CCL5")
-```
-
 ### Summary
 
-This analysis demonstrated that
+This analysis demonstrated that ... 
 
 - standard tools works with HDF5-backed data
 - Pain points
@@ -965,18 +946,26 @@ This means that downstream steps, such as computing the $t$-SNE co-ordinates and
 
 which means that computing the $t$-SNE takes the same amount of time.s
 
+#### t-SNE
+
+We can now compute a $t$-SNE representation of the data and plot it.
+
+```{r}
+set.seed(1000)
+sce <- runTSNE(sce, use_dimred = "PCA", perplexity = 30)
+# TODO: Colour tSNE by an interesting gene.
+plotTSNE(sce, colour_by = "CCL5")
+```
+
 ### Things to include
 
-- Take a 10x dataset in TENxMatrix format.
-  - Have to use HDF5Matrix format (see https://github.com/MarioniLab/DropletUtils/issues/15)
-
 - Feature some of the cools things Aaron has been doing with DA
-  - DeferredMatrix
-  - LowRankMatrix
+  - DeferredMatrix?
+  - LowRankMatrix?
   - beachmat
   - Deferred PCA
 
-## Workflow tips for DelayedArray-backed analyses (20 mins)
+## Workflow tips for DelayedArray-backed analyses (10 mins)
 
 - Saving and loading DA- and HDF5A-backed objects
 - Writing functions that 'consume' DAs
@@ -989,7 +978,8 @@ which means that computing the $t$-SNE takes the same amount of time.s
 - Debugging
 - `withDimnames = FALSE`
 - `rhdf5::h5ls()`
-
+- Load it all and compute
+- `memuse::howbig()`
 
 ### Block-processing performance
 
@@ -1015,6 +1005,7 @@ knitr::knit_exit()
 - [ ] Update block-processing figures because code has changed. 
 - [x] Find a 10x dataset in TENxData format
 - [ ] Get correct citation for Zheng.
+- [ ] Check citations
 
 ```{r, echo = FALSE, eval = FALSE}
 # NOTE: This is a lot of code to generate a graph containing little information.
