@@ -987,6 +987,33 @@ This puts the DelayedArray-backed analysis on par with a fully in-memory-based a
 - Load it all and compute
 - `memuse::howbig()`
 
+### Clever Aaron stuff
+
+Those with an interest in clever performance tricks may be interested in the *DeferredMatrix*, *LowRankMatrix*, and *ResidualMatrix* classes, derived from the *DelayedMatrix* class, that are implemented in the `r BiocStyle::Biocpkg("BiocSingular")` package.
+
+```{r, eval = FALSE, echo = FALSE}
+library(BiocSingular)
+design <- model.matrix(~gl(5, 1000))
+
+library(Matrix)
+y0 <- rsparsematrix(nrow(design), 30000, 0.01)
+y <- ResidualMatrix(y0, design)
+
+object.size(y)
+## 19523952 bytes
+system.time(pc.out <- runPCA(y, 10, BSPARAM=IrlbaParam()))
+##    user  system elapsed
+##   5.146   0.240   5.386
+
+# For comparison:
+fit <- lm.fit(x=design, y=as.matrix(y0))
+object.size(fit$residuals)
+## 1200000392 bytes
+system.time(pc.out <- runPCA(fit$residuals, 10, BSPARAM=IrlbaParam()))
+##    user  system elapsed
+## 105.118   0.244 105.377
+````
+
 ### Block-processing performance
 
 Here, this strategy (the 'load it all into memory' strategy) works and is in fact faster and requires less memory allocated^[Total memory allocated is not the same as peak-memory used. For example, a process could allocate 1000 MB of memory as 100 x 10 MB blocks and have a peak memory usage of 10 MB or in 1 x 1000 MB block and have a peak memory usage of 1000 MB. Often it is peak memory we care about, but this is tricky to measure.] than running `colSums(tenx_counts_subset`)`!
@@ -998,182 +1025,23 @@ bench::mark(
   min_iterations = 10)
 ```
 
+## References
+
 ```{r, echo = FALSE}
 knitr::knit_exit()
 ```
 
 ## Concluding remarks
 
-**TODO:** Necessary?
+**TODO:** One paragraph tops.
 
 ## TODOs
 
-- [ ] Update block-processing figures because code has changed. 
-- [x] Find a 10x dataset in TENxData format
-- [ ] Get correct citation for Zheng.
-- [ ] Check citations
-
-```{r, echo = FALSE, eval = FALSE}
-# NOTE: This is a lot of code to generate a graph containing little information.
-
-
-library(ggraph)
-library(magrittr)
-
-# NOTE: Adapted from http://lazappi.id.au/2018/06/exploring-the-sce-verse/.
-get_bioc_deps <- function(bpi, pkg, reverse) {
-  deps <- bpi %>%
-    dplyr::filter(Package == pkg)
-  
-  if (reverse) {
-    deps <- deps %>%
-      dplyr::select(
-        Depends = dependsOnMe,
-        Imports = importsMe,
-        Suggests = suggestsMe)
-  } else {
-    deps <- deps %>%
-      dplyr::select(Depends, Imports, Suggests)
-  }
-  
-  deps <- deps %>%
-    tidyr::gather(key = "type", value = "package") %>%
-    tidyr::separate_rows() %>%
-    dplyr::filter(!is.na(package))
-  
-  if (reverse) {
-    deps <- deps %>%
-      dplyr::mutate(package2 = pkg) %>%
-      dplyr::rename(package1 = package)
-  } else {
-    deps <- deps %>%
-      dplyr::mutate(package1 = pkg) %>%
-      dplyr::rename(package2 = package)
-  }
-  
-  deps <- deps %>% 
-    dplyr::select(package1, Dependency = type, package2)
-}
-# NOTE: From http://lazappi.id.au/2018/06/exploring-the-sce-verse/
-get_cran_deps <- function(pkg, db, reverse) {
-  
-  types <- c("Depends", "Imports", "Suggests")
-  
-  deps <- sapply(types, function(type) {
-    deps <- tools::package_dependencies(
-      pkg,
-      db,
-      which = type,
-      reverse = reverse)
-    c(type = type, package = paste(deps[[1]], collapse = ", "))
-  })
-  
-  deps <- deps %>%
-    t() %>%
-    dplyr::as_data_frame() %>%
-    dplyr::mutate(type = tolower(type)) %>%
-    dplyr::filter(package != "") %>%
-    tidyr::separate_rows(package)
-  
-  if (nrow(deps) == 0) {
-    return(
-      dplyr::tibble(
-        package1 = character(),
-        Dependency = character(),
-        package2 = character()))
-  }
-  
-  if (reverse) {
-    deps <- deps %>%
-      dplyr::mutate(package2 = pkg) %>%
-      dplyr::rename(package1 = package)
-  } else {
-    deps <- deps %>%
-      dplyr::mutate(package1 = pkg) %>%
-      dplyr::rename(package2 = package)
-  }
-  
-  deps <- deps %>% dplyr::select(package1, Dependency = type, package2)
-}
-
-bpi <- BiocPkgTools::biocPkgList()
-db <- available.packages(repos = "http://cran.r-project.org")
-bioc_revdeps <- get_bioc_deps(bpi, "DelayedArray", reverse = TRUE)
-cran_revdeps <- get_cran_deps("DelayedArray", db, reverse = TRUE)
-nodes <- bioc_revdeps %>%
-  dplyr::bind_rows(cran_revdeps) %>%
-  dplyr::select(-Dependency) %>%
-  tidyr::gather(key = id, value = package) %>%
-  dplyr::select(-id) %>%
-  dplyr::distinct() %>%
-  dplyr::mutate(
-    repo = dplyr::if_else(package %in% bpi$Package, "Bioconductor", "CRAN"))
-edges <- bioc_revdeps %>%
-  dplyr::bind_rows(cran_revdeps) %>%
-  dplyr::rename(from = package1, to = package2)
-graph <- tidygraph::tbl_graph(nodes = nodes, edges = edges)
-
-ggraph(graph, layout = "fr") +
-  geom_edge_fan(aes(colour = Dependency), check_overlap = FALSE) +
-  geom_node_label(aes(label = package), repel = TRUE) +
-  scale_edge_color_brewer(palette = "Dark2") +
-  theme_graph() + 
-  ggtitle("Packages that depend upon DelayedArray")
-```
-
-## OLD STUFF
-
-
-```{r write10x, echo = FALSE}
-# NOTE: We'll need to re-create the process of loading the CellRanger output 
-#       into SingleCellExperiment object. To do so, we'll take a subset of the 
-#       `tenx` object and write it to disk in the CellRanger HDF5 output format.
-#       A reminder: you wouldn't do this in a 'real' data analysis! It's just 
-#       to create a dataset for our workshop.].
-# TODO: Include this code chunk in the 'appendix'.
-tenx_subset <- tenx[, 1:1000]
-DropletUtils::write10xCounts(
-  path = tenx_path,
-  x = counts(tenx_subset),
-  gene.id = rowData(tenx_subset)$Ensembl,
-  type = "HDF5",
-  version = "3")
-```
-
-```{r, eval = FALSE, echo = FALSE}
-# TODO: This doesn't make an HDF5 file in the CellRanger output format.
-library(DropletUtils)
-tenx_path <- tempfile("tenx_subset", fileext = ".h5")
-pbmc4k <- TENxPBMCData::TENxPBMCData("pbmc4k")
-writeTENxMatrix(counts(pbmc4k, withDimnames = FALSE), tenx_path, group = "pbmc4k", verbose = TRUE)
-```
-
-```{r, eval = FALSE, echo = FALSE}
-# TODO: This doesn't produce a TENxMatrix when loading in with read10xCounts().
-#       See https://github.com/MarioniLab/DropletUtils/issues/15.
-library(DropletUtils)
-
-tenx_path <- tempfile("tenx_subset", fileext = ".h5")
-pbmc4k <- TENxPBMCData::TENxPBMCData("pbmc4k")
-write10xCounts(
-  path = tenx_path,
-  x = counts(pbmc4k, withDimnames = FALSE),
-  barcodes = pbmc4k$Barcode,
-  gene.id = rowData(pbmc4k)$ENSEMBL_ID,
-  type = "HDF5",
-  version = "3",
-  genome = "matrix")
-rhdf5::h5ls(tenx_path)
-pbmc4k_colData <- colData(pbmc4k)
-```
-
-The `DropletUtils::read10xCounts()` function can load the output of the **CellRanger** software into R.
-Here we will use it to load the CellRanger 'filtered' HDF5 output file into a *TENxMatrix* object which is then wrapped up in a *SingleCellExperiment*.
+- [ ] Update block-processing figures because code has changed.
 
 ```{r}
-sce <- read10xCounts(tenx_path)
-# NOTE: We include the sample metadata back in.
-colData(sce) <- pbmc4k_colData
-sce
+# TODO: Stepping through quickCluster with the HDF5-backed data to figure out why 
+#       it's so slow (running on unix311).
+#       Right now, I can't figure it out.
+# TODO: Try first converting to TENxMatrix and see what isSparse() tells me.
 ```
-
