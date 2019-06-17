@@ -20,6 +20,7 @@ Imports:
   EnsDb.Hsapiens.v86,
   scater,
   scran,
-  BiocSingular
+  BiocSingular,
+  rhdf5
 License: Artistic-2.0
 VignetteBuilder: knitr
