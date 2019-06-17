@@ -1,72 +1,86 @@
-# Effectively using the DelayedArray framework to support the analysis of large datasets
 
-# Instructor(s) name(s) and contact information
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Peter Hickey (GitHub/Twitter: @PeteHaitch, email: peter.hickey@gmail.com)
+# Effectively using the DelayedArray framework as a user to support the analysis of large datasets
 
-# Workshop Description
+[![Travis-CI Build
+Status](https://travis-ci.org/PeteHaitch/BioC2019_DelayedArray_workshop.svg?branch=master)](https://travis-ci.org/PeteHaitch/BioC2019_DelayedArray_workshop)
 
-This workshop will teach the fundamental concepts underlying the DelayedArray framework and related infrastructure. 
-It is intended for package developers who want to learn how to use the DelayedArray framework to support the analysis of large datasets, particularly through the use of on-disk data storage.
-The first part of the workshop will provide an overview of the DelayedArray 
-infrastructure and introduce computing on DelayedArray objects using delayed operations and block-processing.
-The second part of the workshop will present strategies for adding support for DelayedArray to an existing package and extending the DelayedArray framework.
-Students can expect a mixture of lecture and question-and-answer session to teach the fundamental concepts.
-There will be plenty of examples to illustrate common design patterns for writing performant code, although we will not be writing much code during the workshop.
+## Workshop description
 
-## Pre-requisites
+This workshop gives an introductory overview of the DelayedArray
+framework, which can be used by Bioconductor packages to support the
+analysis of large datasets. A *DelayedArray* is like an ordinary array
+in R, but allows for the data to be in-memory (including space-efficient
+formats like sparse arrays and run length encoded arrays), on-disk in a
+file, or even hosted on a remote server. Participants will learn where
+they might encounter a *DelayedArray* in the wild while using
+Bioconductor and help them understand the fundamental concepts
+underlying the framework. This workshop will be a mixture of lecture
+with example code and discussion. Examples will mostly be drawn from the
+analysis of single-cell RNA-sequencing data.
 
-* Solid understanding of R
-* Familiarity with common operations on arrays (e.g., `colSums()` and those available in the matrixStats package)
-* Familiarity with object oriented programming, particularly S4, will be useful but is not essential
-* No familiarity required of technical details of particular data storage backends (e.g., HDF5, sparse matrices)
-* No familiarity required of particular biological techniques (e.g., single-cell RNA-seq)
+### Instructor
 
-## Workshop Participation
+  - Peter Hickey (<hickey@wehi.edu.au>)
 
-Questions and discussion are encouraged! 
-This will be especially important to guide the second half of the worshop which focuses on integrating DelayedArray into an existing or new Bioconductor package.
-Students will be expected to be able to follow and reason about example R code. 
+### Pre-requisites
 
-## _R_ / _Bioconductor_ packages used
+  - Basic knowledge of R syntax.
+  - Familiarity with common operations on matrices in R, such as
+    `colSums()` and `colMeans()`.
+  - Some familiarity with S4 objects may be helpful but is not required.
+  - Some familiarity with single-cell RNA-sequencing may be helpful but
+    is not required.
 
-* DelayedArray
-* HDF5Array
-* SummarizedExperiment
-* DelayedMatrixStats
-* beachmat
+### Workshop Participation
 
-## Time outline
+Students will be able to run code interactively during the workshop.
+There will be opportunities throughout the workshop for questions and
+discussion.
 
-| Activity                                          | Time |
-|---------------------------------------------------|------|
-| Introductory slides                               | 15m  |
-| Part 1: Overview of DelayedArray framework        | 45m  |
-| Part 2: Incoporating DelayedArray into a package  | 45m  |
-| Questions and discussion                          | 15m  |
+### *R* / *Bioconductor* packages used
 
-# Workshop goals and objectives
+  - *[DelayedArray](https://bioconductor.org/packages/3.9/DelayedArray)*
+  - *[HDF5Array](https://bioconductor.org/packages/3.9/HDF5Array)*
+  - *[DelayedMatrixStats](https://bioconductor.org/packages/3.9/DelayedMatrixStats)*
+  - *[TENxBrainData](https://bioconductor.org/packages/3.9/TENxBrainData)*
+  - *[TENxPBMCData](https://bioconductor.org/packages/3.9/TENxPBMCData)*
+  - *[BiocSingular](https://bioconductor.org/packages/3.9/BiocSingular)*
+  - *[scater](https://bioconductor.org/packages/3.9/scater)*
+  - *[scran](https://bioconductor.org/packages/3.9/scran)*
 
-## Learning goals
+### Time outline
 
-* Identify when it is useful to use a DelayedArray instead of an ordinary array or other array-like data structure.
-* Become familiar with the fundamental concepts of delayed operations, block-processing, and realization.
-* Learn of existing functions and packages for constructing and computing on DelayedArray objects, avoiding the need to re-invent the wheel.
-* Learn common design patterns for writing performant code that operates on a DelayedArray.
-* Evaluate whether an existing function that operates on an ordinary array can be readily adapted to work on a DelayedArray.
-* Reason about potential bottlenecks in algorithms operating on DelayedArray objects.
+| Activity                                       | Time |
+| ---------------------------------------------- | ---- |
+| Introductory material                          | 10m  |
+| First contact                                  | 40m  |
+| Package ecosystem                              | 10m  |
+| Real world encounters analysing scRNA-seq data | 25m  |
+| Workflow tips for DelayedArray-backed analyses | 15m  |
 
-## Learning objectives
+### Workshop goals and objectives
 
-* Understand the differences between a DelayedArray instance and an instance of a subclass (e.g., HDF5Array, RleArray).
-* Know what types of operations 'degrade' an instance of a DelayedArray subclass to a DelayedArray, as well as when and why this matters.
-* Construct a DelayedArray:
-  * From an in-memory array-like object.
-  * From an on-disk data store (e.g., HDF5).
-  * From scratch by writing data to a RealizationSink.
-* Take a function that operates on rows or columns of a matrix and apply it to a DelayedMatrix.
-* Use block-processing on a DelayedArray to compute:
-  * A univariate (scalar) summary statistic (e.g., `max()`).
-  * A multivariate (vector) summary statistic (e.g., `colSum()` or `rowMean()`).
-  * A multivariate (array-like) summary statistic (e.g., `rowRanks()`).
-* Design an algorithm that imports data into a DelayedArray.
+#### Learning goals
+
+  - Learn of existing packages and functions that *use* the DelayedArray
+    framework.
+  - Develop a high-level understanding of classes and packages that
+    *implement* the DelayedArray framework.
+  - Become familiar with the fundamental concepts of delayed operations,
+    block-processing, and realization.
+  - Reason about potential bottlenecks in algorithms operating on
+    *DelayedArray* objects.
+
+#### Learning objectives
+
+  - Identify when an object is a *DelayedArray* or one of its
+    derivatives.
+  - Be able to recognise when it is useful to use a *DelayedArray*
+    instead of an ordinary array or other array-like data structure.
+  - Learn how to load and save a DelayedArray-backed object.
+  - Learn how the ‘block size’ and ‘chunking’ of the dataset affect
+    performance when operating on *DelayedArray* objects.
+  - Take away some miscellaneous tips and tricks I’ve learnt over the
+    years when working with DelayedArray-backed objects.
