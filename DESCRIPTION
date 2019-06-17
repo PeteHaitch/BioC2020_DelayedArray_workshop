@@ -21,6 +21,8 @@ Imports:
   scater,
   scran,
   BiocSingular,
-  rhdf5
+  rhdf5,
+  igraph
 License: Artistic-2.0
 VignetteBuilder: knitr
+Encoding: UTF-8
