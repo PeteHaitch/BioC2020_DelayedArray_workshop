@@ -3,8 +3,11 @@
 
 # Effectively using the DelayedArray framework as a user to support the analysis of large datasets
 
-[![Travis-CI Build
-Status](https://travis-ci.org/PeteHaitch/BioC2019_DelayedArray_workshop.svg?branch=master)](https://travis-ci.org/PeteHaitch/BioC2019_DelayedArray_workshop)
+<!-- badges: start -->
+
+[![R build
+status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/R-CMD-check/badge.svg)](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/actions)
+<!-- badges: end -->
 
 ## Workshop description
 
@@ -41,14 +44,14 @@ discussion.
 
 ### *R* / *Bioconductor* packages used
 
-  - *[DelayedArray](https://bioconductor.org/packages/3.9/DelayedArray)*
-  - *[HDF5Array](https://bioconductor.org/packages/3.9/HDF5Array)*
-  - *[DelayedMatrixStats](https://bioconductor.org/packages/3.9/DelayedMatrixStats)*
-  - *[TENxBrainData](https://bioconductor.org/packages/3.9/TENxBrainData)*
-  - *[TENxPBMCData](https://bioconductor.org/packages/3.9/TENxPBMCData)*
-  - *[BiocSingular](https://bioconductor.org/packages/3.9/BiocSingular)*
-  - *[scater](https://bioconductor.org/packages/3.9/scater)*
-  - *[scran](https://bioconductor.org/packages/3.9/scran)*
+  - *[DelayedArray](https://bioconductor.org/packages/3.11/DelayedArray)*
+  - *[HDF5Array](https://bioconductor.org/packages/3.11/HDF5Array)*
+  - *[DelayedMatrixStats](https://bioconductor.org/packages/3.11/DelayedMatrixStats)*
+  - *[TENxBrainData](https://bioconductor.org/packages/3.11/TENxBrainData)*
+  - *[TENxPBMCData](https://bioconductor.org/packages/3.11/TENxPBMCData)*
+  - *[BiocSingular](https://bioconductor.org/packages/3.11/BiocSingular)*
+  - *[scater](https://bioconductor.org/packages/3.11/scater)*
+  - *[scran](https://bioconductor.org/packages/3.11/scran)*
 
 ### Time outline
 

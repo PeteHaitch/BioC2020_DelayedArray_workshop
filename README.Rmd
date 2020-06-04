@@ -16,7 +16,9 @@ knitr::opts_chunk$set(
 
 # Effectively using the DelayedArray framework as a user to support the analysis of large datasets
 
-[![Travis-CI Build Status](https://travis-ci.org/PeteHaitch/BioC2019_DelayedArray_workshop.svg?branch=master)](https://travis-ci.org/PeteHaitch/BioC2019_DelayedArray_workshop)
+<!-- badges: start -->
+[![R build status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/R-CMD-check/badge.svg)](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/actions)
+<!-- badges: end -->
 
 ## Workshop description
 
