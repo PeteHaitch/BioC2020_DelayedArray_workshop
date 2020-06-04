@@ -2,12 +2,15 @@ Package: DelayedArrayWorkshop
 Type: Package
 Title: A Workshop on Effectively Using the DelayedArray Framework to Support the Analysis of Large Datasets
 Authors@R: c(
-  person("Hickey", "Peter", role = c("aut", "cre"),
-         email = "peter.hickey@gmail.com"))
+  person(
+  given = "Peter",
+  family = "Hickey",
+  role = c("aut", "cre"),
+  email = "peter.hickey@gmail.com",
+  comment = c(ORCID = "0000-0002-8153-6258")))
 Version: 0.99.1
 Description: This workshop will teach the fundamental concepts underlying the 
   DelayedArray framework and related infrastructure. 
-Suggests: knitr
 Imports:
   DelayedArray,
   TENxBrainData,
@@ -23,6 +26,10 @@ Imports:
   BiocSingular,
   rhdf5,
   igraph
+Suggests: 
+    knitr,
+    pkgdown
 License: Artistic-2.0
 VignetteBuilder: knitr
 Encoding: UTF-8
+DockerImage: PeteHaitch/BioC2020_DelayedArray_workshop:latest
