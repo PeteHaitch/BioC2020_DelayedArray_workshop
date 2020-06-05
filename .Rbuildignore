@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-.travis.yml
 README.Rmd
-.github/
+.github
+Dockerfile
+_pkgdown.yml
