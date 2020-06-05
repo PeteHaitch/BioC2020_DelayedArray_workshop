@@ -1,0 +1,9 @@
+pandoc: 2.3.1
+pkgdown: 1.5.1
+pkgdown_sha: ~
+articles: []
+last_built: 2020-06-05T09:55Z
+urls:
+  reference: https://PeteHaitch.github.io/BioC2020_DelayedArray_workshop/reference
+  article: https://PeteHaitch.github.io/BioC2020_DelayedArray_workshop/articles
+
