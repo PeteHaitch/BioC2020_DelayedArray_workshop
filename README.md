@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![R build
-status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/R-CMD-check/badge.svg)](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/actions)
+status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/.github/workflows/basic_checks.yaml/badge.svg)](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/actions)
 <!-- badges: end -->
 
 ## Workshop description
