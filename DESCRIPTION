@@ -8,7 +8,7 @@ Authors@R: c(
   role = c("aut", "cre"),
   email = "peter.hickey@gmail.com",
   comment = c(ORCID = "0000-0002-8153-6258")))
-Version: 0.99.1
+Version: 0.99.2
 Description: This workshop will teach the fundamental concepts underlying the 
   DelayedArray framework and related infrastructure. 
 Imports:
@@ -19,13 +19,10 @@ Imports:
   BiocPkgTools,
   rmarkdown,
   BiocStyle,
-  TENxPBMCData,
-  EnsDb.Hsapiens.v86,
-  scater,
-  scran,
-  BiocSingular,
   rhdf5,
-  igraph
+  TENxPBMCData,
+  scater,
+  scran
 Suggests: 
     knitr,
     pkgdown
