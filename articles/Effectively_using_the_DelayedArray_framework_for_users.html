@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DelayedArrayWorkshop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.3</span>
       </span>
     </div>
 
@@ -83,7 +83,7 @@
       <h1 data-toc-skip>Effectively using the DelayedArray framework as a user to support the analysis of large datasets</h1>
                         <h4 class="author">Peter Hickey</h4>
             
-            <h4 class="date">Last modified: June 5, 2020; Compiled: June 05, 2020</h4>
+            <h4 class="date">Last modified: June 5, 2020; Compiled: June 19, 2020</h4>
       
       
       <div class="hidden name"><code>Effectively_using_the_DelayedArray_framework_for_users.Rmd</code></div>
@@ -199,7 +199,7 @@
 <a href="#introductory-material" class="anchor"></a>Introductory material</h2>
 <p>Data from a high-throughput biological assay, such as single-cell RNA-sequencing (scRNA-seq), will often be summarised as a matrix of counts, where rows correspond to features and columns to samples<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. Within <strong>Bioconductor</strong>, the <em>SummarizedExperiment</em> class is the recommended container for such data, offering a rich interface that tightly links assay measurements to data on the features and the samples.</p>
 <p>The <em>SummarizedExperiment</em> class is used to store rectangular arrays of experimental results (<em>assays</em>). Here, each <em>assay</em> is drawn as a matrix but higher-dimensional arrays are also supported.</p>
-<p><img src="../../../../tmp/Rtmpuyl994/SE.svg"><!-- --></p>
+<p><img src="../../../../tmp/Rtmpth2G58/SE.svg"><!-- --></p>
 <p>Traditionally, the assay data are stored in-memory as an ordinary <em>array</em> object<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>. Storing the data in-memory becomes a real pain with the ever-growing size of ’omics datasets. It is now not uncommon to collect <span class="math inline">\(10,000-100,000,000\)</span> measurements on <span class="math inline">\(100 - 1,000,000\)</span> samples, which would occupy <span class="math inline">\(10-1,000\)</span> gigabytes (Gb) if stored in-memory as ordinary R arrays.</p>
 <p>The DelayedArray framework offers a solution to this problem. Wrapping an array-like object (typically an on-disk object) in a <em>DelayedArray</em> object allows one to perform common array operations on it without loading the object in memory. In order to reduce memory usage and optimize performance, operations on the object are either delayed or executed using a block processing mechanism.</p>
 <div id="projects-enabled-by-delayedarray" class="section level3">
@@ -216,6 +216,7 @@
 <p>The heart of the DelayedArray framework is implemented in the <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> package, which we now load.</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">DelayedArray</span>)
 <span class="co">#&gt; Loading required package: stats4</span>
+<span class="co">#&gt; Loading required package: Matrix</span>
 <span class="co">#&gt; Loading required package: matrixStats</span>
 <span class="co">#&gt; Loading required package: BiocGenerics</span>
 <span class="co">#&gt; Loading required package: parallel</span>
@@ -240,6 +241,9 @@
 <span class="co">#&gt; Loading required package: S4Vectors</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Attaching package: 'S4Vectors'</span>
+<span class="co">#&gt; The following object is masked from 'package:Matrix':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     expand</span>
 <span class="co">#&gt; The following object is masked from 'package:base':</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;     expand.grid</span>
@@ -278,8 +282,8 @@
 <span class="co">#       run. The result will be cached, however, so subsequent runs avoid </span>
 <span class="co">#       re-downloading the data.</span>
 <span class="no">tenx</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxBrainData/man/TENxBrainData.html">TENxBrainData</a></span>()
-<span class="co">#&gt; using temporary cache /tmp/Rtmpuyl994/BiocFileCache</span>
-<span class="co">#&gt; snapshotDate(): 2020-06-01</span>
+<span class="co">#&gt; using temporary cache /tmp/Rtmpth2G58/BiocFileCache</span>
+<span class="co">#&gt; snapshotDate(): 2020-06-11</span>
 <span class="co">#&gt; see ?TENxBrainData and browseVignettes('TENxBrainData') for documentation</span>
 <span class="co">#&gt; downloading 1 resources</span>
 <span class="co">#&gt; retrieving 1 resource</span>
@@ -307,8 +311,8 @@
 <span class="co">#&gt; assays(1): counts</span>
 <span class="co">#&gt; rownames: NULL</span>
 <span class="co">#&gt; rowData names(2): Ensembl Symbol</span>
-<span class="co">#&gt; colnames(200000): GCACATACATTCCTCG-116 GCAGTTAAGACAATAC-63 ...</span>
-<span class="co">#&gt;   TTTGTCACAGGGAGAG-23 GATCGATTCGCTAGCG-100</span>
+<span class="co">#&gt; colnames(200000): TACGGGCTCATCGCTC-20 ACGTCAAAGTCGATAA-99 ...</span>
+<span class="co">#&gt;   CGCGTTTGTATAAACG-123 CACCTTGCAAACCTAC-62</span>
 <span class="co">#&gt; colData names(4): Barcode Sequence Library Mouse</span>
 <span class="co">#&gt; reducedDimNames(0):</span>
 <span class="co">#&gt; altExpNames(0):</span></pre></body></html></div>
@@ -357,7 +361,7 @@
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_counts</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/Rtmpuyl994/BiocFileCache/c5f37e4f4d6b_1040"</span>
+<span class="co">#&gt; [1] "/tmp/Rtmpth2G58/BiocFileCache/63ac4c91e630_1040"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "counts"</span>
@@ -960,7 +964,7 @@
 <h4 class="hasAnchor">
 <a href="#block-processing-illustrated" class="anchor"></a>Block-processing illustrated</h4>
 <p>Some examples of block-processing are illustrated in the following figures:</p>
-<p><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide1.png"><!-- --><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide2.png"><!-- --><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide3.png"><!-- --><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide4.png"><!-- --><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide5.png"><!-- --><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide6.png"><!-- --><img src="../../../../tmp/RtmpmQxQz3/temp_libpathc59376543be4/DelayedArrayWorkshop/vignettes/Slide7.png"><!-- --></p>
+<p><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide1.png"><!-- --><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide2.png"><!-- --><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide3.png"><!-- --><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide4.png"><!-- --><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide5.png"><!-- --><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide6.png"><!-- --><img src="../../../../tmp/RtmpUiDXcV/temp_libpath634c2a722ebe/DelayedArrayWorkshop/vignettes/Slide7.png"><!-- --></p>
 </div>
 <div id="block-processed-column-sums" class="section level4">
 <h4 class="hasAnchor">
@@ -1129,8 +1133,8 @@
 <span class="co">#&gt; └─ 27998x1000 integer: [seed] HDF5ArraySeed object</span></pre></body></html></div>
 <p>Used like this, <code>writeHDF5Array()</code> and <code>as(..., "HDF5Array")</code> will write their results to a file in <em>HDF5 dump directory</em>, a dumping ground for automatically created HDF5 datasets. We can see a log of the operations that have written to the HDF5 dump directory using <code>showHDF5DumpLog()</code>.</p>
 <div class="sourceCode" id="cb38"><html><body><pre class="r"><span class="fu">showHDF5DumpLog</span>()
-<span class="co">#&gt; [2020-06-05 09:58:06] #1 In file '/tmp/Rtmpuyl994/HDF5Array_dump/auto00001.h5': creation of dataset '/HDF5ArrayAUTO00001' (27998x1000:integer, chunkdims=5291x188, level=6)</span>
-<span class="co">#&gt; [2020-06-05 09:58:08] #2 In file '/tmp/Rtmpuyl994/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002' (27998x1000:integer, chunkdims=5291x188, level=6)</span></pre></body></html></div>
+<span class="co">#&gt; [2020-06-19 00:43:58] #1 In file '/tmp/Rtmpth2G58/HDF5Array_dump/auto00001.h5': creation of dataset '/HDF5ArrayAUTO00001' (27998x1000:integer, chunkdims=5291x188, level=6)</span>
+<span class="co">#&gt; [2020-06-19 00:44:00] #2 In file '/tmp/Rtmpth2G58/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002' (27998x1000:integer, chunkdims=5291x188, level=6)</span></pre></body></html></div>
 <p>Often, however, we will want full control of where and how the data are written to the HDF5 file<a href="#fn15" class="footnote-ref" id="fnref15"><sup>15</sup></a> and the <code>writeHDF5Array()</code> function gives you full control over this and more.</p>
 <div class="sourceCode" id="cb39"><html><body><pre class="r"><span class="co"># Write the data to a user-specified HDF5 file using maximum compression and </span>
 <span class="co"># 'chunking' along the columns.</span>
@@ -1147,7 +1151,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_counts_subset_hdf5</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/Rtmpuyl994/HDF5Array_dump/auto00001.h5"</span>
+<span class="co">#&gt; [1] "/tmp/Rtmpth2G58/HDF5Array_dump/auto00001.h5"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "/HDF5ArrayAUTO00001"</span>
@@ -1166,7 +1170,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_counts_subset_my_file_hdf5</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/Rtmpuyl994/filec5f3459013f7.h5"</span>
+<span class="co">#&gt; [1] "/tmp/Rtmpth2G58/file63ac47fbca8d.h5"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "/HDF5ArrayAUTO00003"</span>
@@ -1313,7 +1317,7 @@
 <span class="kw pkg">rmarkdown</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmarkdown/man/paged_table.html">paged_table</a></span>(<span class="no">da_dep_tbl</span>)</pre></body></html></div>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["Package"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Dependency Type"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"DelayedDataFrame","2":"Depends"},{"1":"DelayedMatrixStats","2":"Depends"},{"1":"GDSArray","2":"Depends"},{"1":"HDF5Array","2":"Depends"},{"1":"restfulSE","2":"Depends"},{"1":"rhdf5client","2":"Depends"},{"1":"singleCellTK","2":"Depends"},{"1":"SummarizedExperiment","2":"Depends"},{"1":"VCFArray","2":"Depends"},{"1":"batchelor","2":"Imports"},{"1":"beachmat","2":"Imports"},{"1":"bigPint","2":"Imports"},{"1":"BiocSingular","2":"Imports"},{"1":"bsseq","2":"Imports"},{"1":"CAGEr","2":"Imports"},{"1":"celaref","2":"Imports"},{"1":"celda","2":"Imports"},{"1":"ChIPpeakAnno","2":"Imports"},{"1":"clusterExperiment","2":"Imports"},{"1":"DEScan2","2":"Imports"},{"1":"DSS","2":"Imports"},{"1":"ELMER","2":"Imports"},{"1":"FRASER","2":"Imports"},{"1":"GenoGAM","2":"Imports"},{"1":"GenomicScores","2":"Imports"},{"1":"glmGamPoi","2":"Imports"},{"1":"gramm4R","2":"Imports"},{"1":"hipathia","2":"Imports"},{"1":"LoomExperiment","2":"Imports"},{"1":"mbkmeans","2":"Imports"},{"1":"methrix","2":"Imports"},{"1":"methylSig","2":"Imports"},{"1":"minfi","2":"Imports"},{"1":"netSmooth","2":"Imports"},{"1":"PCAtools","2":"Imports"},{"1":"RTCGAToolbox","2":"Imports"},{"1":"scater","2":"Imports"},{"1":"scDblFinder","2":"Imports"},{"1":"scMerge","2":"Imports"},{"1":"scmeth","2":"Imports"},{"1":"scran","2":"Imports"},{"1":"scuttle","2":"Imports"},{"1":"signatureSearch","2":"Imports"},{"1":"SingleR","2":"Imports"},{"1":"VariantExperiment","2":"Imports"},{"1":"weitrix","2":"Imports"},{"1":"BiocGenerics","2":"Suggests"},{"1":"gwascat","2":"Suggests"},{"1":"iSEE","2":"Suggests"},{"1":"MAST","2":"Suggests"},{"1":"S4Vectors","2":"Suggests"},{"1":"SQLDataFrame","2":"Suggests"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["Package"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Dependency Type"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"DelayedDataFrame","2":"Depends"},{"1":"DelayedMatrixStats","2":"Depends"},{"1":"GDSArray","2":"Depends"},{"1":"HDF5Array","2":"Depends"},{"1":"restfulSE","2":"Depends"},{"1":"rhdf5client","2":"Depends"},{"1":"singleCellTK","2":"Depends"},{"1":"SummarizedExperiment","2":"Depends"},{"1":"VCFArray","2":"Depends"},{"1":"batchelor","2":"Imports"},{"1":"beachmat","2":"Imports"},{"1":"bigPint","2":"Imports"},{"1":"BiocSingular","2":"Imports"},{"1":"bsseq","2":"Imports"},{"1":"CAGEr","2":"Imports"},{"1":"celaref","2":"Imports"},{"1":"celda","2":"Imports"},{"1":"clusterExperiment","2":"Imports"},{"1":"DEScan2","2":"Imports"},{"1":"DSS","2":"Imports"},{"1":"ELMER","2":"Imports"},{"1":"FRASER","2":"Imports"},{"1":"GenoGAM","2":"Imports"},{"1":"GenomicScores","2":"Imports"},{"1":"glmGamPoi","2":"Imports"},{"1":"gramm4R","2":"Imports"},{"1":"hipathia","2":"Imports"},{"1":"LoomExperiment","2":"Imports"},{"1":"mbkmeans","2":"Imports"},{"1":"methrix","2":"Imports"},{"1":"methylSig","2":"Imports"},{"1":"minfi","2":"Imports"},{"1":"netSmooth","2":"Imports"},{"1":"PCAtools","2":"Imports"},{"1":"RTCGAToolbox","2":"Imports"},{"1":"scater","2":"Imports"},{"1":"scDblFinder","2":"Imports"},{"1":"scMerge","2":"Imports"},{"1":"scmeth","2":"Imports"},{"1":"scran","2":"Imports"},{"1":"scuttle","2":"Imports"},{"1":"signatureSearch","2":"Imports"},{"1":"SingleR","2":"Imports"},{"1":"VariantExperiment","2":"Imports"},{"1":"weitrix","2":"Imports"},{"1":"BiocGenerics","2":"Suggests"},{"1":"ChIPpeakAnno","2":"Suggests"},{"1":"gwascat","2":"Suggests"},{"1":"iSEE","2":"Suggests"},{"1":"MAST","2":"Suggests"},{"1":"S4Vectors","2":"Suggests"},{"1":"SQLDataFrame","2":"Suggests"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>We will briefly highlight some of the key packages in this table, broadly categorising these as ‘user-focused’/‘user-facing’ or ‘developer-focused’ packages and those that span the spectrum.</p>
@@ -1383,7 +1387,7 @@
 <h4 class="hasAnchor">
 <a href="#mbkmeans" class="anchor"></a><em><a href="https://bioconductor.org/packages/3.12/mbkmeans">mbkmeans</a></em>
 </h4>
-<p>Implements the mini-batch k-means algorithm for large datasets, including support for on-disk data representation (i.e. <em>HDF5Matrix</em> objects).</p>
+<p>Implements the mini-batch k-means algorithm for large datasets, including support for on-disk data representation (i.e. <em>HDF5Matrix</em> objects).</p>
 </div>
 <div id="bsseq" class="section level4">
 <h4 class="hasAnchor">
@@ -1401,7 +1405,7 @@
 <h4 class="hasAnchor">
 <a href="#delayedmatrixstats-1" class="anchor"></a><em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em>
 </h4>
-<p>A port of the <em><a href="https://CRAN.R-project.org/package=matrixStats">matrixStats</a></em> API for use with <em>DelayedMatrix</em> objects. High-performing functions operating on rows and columns of <em>DelayedMatrix</em> objects, e.g. <code>col</code> / <code><a href="https://rdrr.io/pkg/DelayedMatrixStats/man/colMedians.html">rowMedians()</a></code>, <code>col</code> / <code><a href="https://rdrr.io/pkg/DelayedMatrixStats/man/colRanks.html">rowRanks()</a></code>, and <code>col</code> / <code><a href="https://rdrr.io/pkg/DelayedMatrixStats/man/colMads.html">rowSds()</a></code>. Functions optimized per data type and for subsetted calculations such that both memory usage and processing time is minimized. Disclaimer: I wrote this one, too.</p>
+<p>A port of the <em><a href="https://CRAN.R-project.org/package=matrixStats">matrixStats</a></em> API for use with <em>DelayedMatrix</em> objects. High-performing functions operating on rows and columns of <em>DelayedMatrix</em> objects, e.g. <code>col</code> / <code><a href="https://rdrr.io/pkg/DelayedMatrixStats/man/colMedians.html">rowMedians()</a></code>, <code>col</code> / <code><a href="https://rdrr.io/pkg/DelayedMatrixStats/man/colRanks.html">rowRanks()</a></code>, and <code>col</code> / <code><a href="https://rdrr.io/pkg/DelayedMatrixStats/man/colMads.html">rowSds()</a></code>. Functions optimized per data type and for subsetted calculations such that both memory usage and processing time is minimized. Disclaimer: I wrote this one, too.</p>
 </div>
 </div>
 <div id="developer-focused-packages" class="section level3">
@@ -1435,14 +1439,14 @@
 <span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span>(<span class="fu">assay</span>(<span class="no">sce</span>, <span class="kw">withDimnames</span> <span class="kw">=</span> <span class="fl">FALSE</span>))</pre></body></html></div>
 <p>We’ll also switch to use the gene symbols provided by 10x Genomics rather than referring to genes by their Ensembl IDs.</p>
 <div class="sourceCode" id="cb48"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">scater</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">sce</span>) <span class="kw">&lt;-</span> <span class="fu">uniquifyFeatureNames</span>(
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">sce</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/reexports.html">uniquifyFeatureNames</a></span>(
   <span class="fu">rowData</span>(<span class="no">sce</span>)$<span class="no">ENSEMBL_ID</span>,
   <span class="fu">rowData</span>(<span class="no">sce</span>)$<span class="no">Symbol_TENx</span>)</pre></body></html></div>
 </div>
 <div id="quality-control-on-the-cells" class="section level4">
 <h4 class="hasAnchor">
 <a href="#quality-control-on-the-cells" class="anchor"></a>Quality control on the cells</h4>
-<p>After loading the data into R, we compute some quality control metrics of the data using <code>scater::addPerCellQC()</code>. Under the hood, this involves computing column sums, comparisons of values, and subsetting of the HDF5-backed count matrix, all seamlessly handled by this function.</p>
+<p>After loading the data into R, we compute some quality control metrics of the data using <code><a href="https://rdrr.io/pkg/scater/man/reexports.html">scater::addPerCellQC()</a></code>. Under the hood, this involves computing column sums, comparisons of values, and subsetting of the HDF5-backed count matrix, all seamlessly handled by this function.</p>
 <div class="sourceCode" id="cb49"><html><body><pre class="r"><span class="co"># NOTE: Need to know which genes are mitochondrial to perform QC.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">EnsDb.Hsapiens.v86</span>)
 <span class="no">location</span> <span class="kw">&lt;-</span> <span class="fu">mapIds</span>(
@@ -1453,7 +1457,7 @@
 <span class="no">is_mito</span> <span class="kw">&lt;-</span> <span class="no">location</span> <span class="kw">==</span> <span class="st">"MT"</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">scater</span>)
-<span class="no">sce</span> <span class="kw">&lt;-</span> <span class="fu">addPerCellQC</span>(<span class="no">sce</span>, <span class="kw">feature_controls</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">Mito</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="no">is_mito</span>)))
+<span class="no">sce</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/reexports.html">addPerCellQC</a></span>(<span class="no">sce</span>, <span class="kw">feature_controls</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">Mito</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="no">is_mito</span>)))
 <span class="fu"><a href="https://rdrr.io/pkg/scater/man/multiplot.html">multiplot</a></span>(
   <span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotColData.html">plotColData</a></span>(<span class="no">sce</span>, <span class="st">"sum"</span>) +
     <span class="fu">ylab</span>(<span class="st">"Log-total UMI count"</span>) +
@@ -1467,7 +1471,7 @@
 
 <span class="co"># We'll discard cells with large mitochondrial proportions, using it as a proxy</span>
 <span class="co"># for cell damage.</span>
-<span class="no">high_mito</span> <span class="kw">&lt;-</span> <span class="fu">isOutlier</span>(<span class="no">sce</span>$<span class="no">pct_counts_Mito</span>, <span class="kw">nmads</span> <span class="kw">=</span> <span class="fl">3</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"higher"</span>)
+<span class="no">high_mito</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/reexports.html">isOutlier</a></span>(<span class="no">sce</span>$<span class="no">pct_counts_Mito</span>, <span class="kw">nmads</span> <span class="kw">=</span> <span class="fl">3</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"higher"</span>)
 <span class="no">sce</span> <span class="kw">&lt;-</span> <span class="no">sce</span>[, !<span class="no">high_mito</span>]</pre></body></html></div>
 </div>
 <div id="examining-gene-expression" class="section level3">
@@ -1571,19 +1575,18 @@
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">TENxPBMCData</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">scran</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">scater</span>)
-<span class="co">#&gt; Loading required package: scuttle</span>
 <span class="co">#&gt; Loading required package: ggplot2</span>
 <span class="co"># NOTE: This will download the data and may take a little while on the first </span>
 <span class="co">#       run. The result will be cached, however, so subsequent runs avoid </span>
 <span class="co">#       re-downloading the data.</span>
 <span class="no">sce</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html">TENxPBMCData</a></span>(<span class="st">"pbmc4k"</span>)
-<span class="co">#&gt; snapshotDate(): 2020-06-01</span>
+<span class="co">#&gt; snapshotDate(): 2020-06-11</span>
 <span class="co">#&gt; see ?TENxPBMCData and browseVignettes('TENxPBMCData') for documentation</span>
 <span class="co">#&gt; downloading 1 resources</span>
 <span class="co">#&gt; retrieving 1 resource</span>
 <span class="co">#&gt; loading from cache</span>
 <span class="no">sce</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/computeSumFactors.html">computeSumFactors</a></span>(<span class="no">sce</span>, <span class="kw">min.mean</span> <span class="kw">=</span> <span class="fl">0.1</span>)
-<span class="no">sce</span> <span class="kw">&lt;-</span> <span class="fu">logNormCounts</span>(<span class="no">sce</span>)</pre></body></html></div>
+<span class="no">sce</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/reexports.html">logNormCounts</a></span>(<span class="no">sce</span>)</pre></body></html></div>
 <div id="short-version" class="section level4">
 <h4 class="hasAnchor">
 <a href="#short-version" class="anchor"></a>Short version</h4>
@@ -1591,7 +1594,7 @@
 <div class="sourceCode" id="cb59"><html><body><pre class="r"><span class="no">dir</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span>(), <span class="st">"my_h5_se"</span>)
 <span class="fu">saveHDF5SummarizedExperiment</span>(<span class="no">sce</span>, <span class="no">dir</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="co">#&gt; Start writing assay 1/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/Rtmpuyl994/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpth2G58/my_h5_se/assays.h5</span>
 <span class="co">#&gt; Realizing block 1/13 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 2/13 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 3/13 ... OK, writing it ... OK</span>
@@ -1606,10 +1609,10 @@
 <span class="co">#&gt; Realizing block 12/13 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 13/13 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Finished writing assay 1/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/Rtmpuyl994/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpth2G58/my_h5_se/assays.h5</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Start writing assay 2/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/Rtmpuyl994/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpth2G58/my_h5_se/assays.h5</span>
 <span class="co">#&gt; Realizing block 1/26 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 2/26 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 3/26 ... OK, writing it ... OK</span>
@@ -1637,10 +1640,10 @@
 <span class="co">#&gt; Realizing block 25/26 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 26/26 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Finished writing assay 2/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/Rtmpuyl994/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpth2G58/my_h5_se/assays.h5</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Serialize SingleCellExperiment object to RDS file:</span>
-<span class="co">#&gt;   /tmp/Rtmpuyl994/my_h5_se/se.rds</span>
+<span class="co">#&gt;   /tmp/Rtmpth2G58/my_h5_se/se.rds</span>
 
 <span class="co"># NOTE: There are no delayed operations on the saved version.</span>
 <span class="no">saved_sce</span> <span class="kw">&lt;-</span> <span class="fu">loadHDF5SummarizedExperiment</span>(<span class="no">dir</span>)
@@ -1700,7 +1703,7 @@
 <span class="co">#&gt; Processing block 8/9 ... OK</span>
 <span class="co">#&gt; Processing block 9/9 ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   7.437   0.817   8.257</span>
+<span class="co">#&gt;   6.840   0.858   7.699</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">y</span>))
 <span class="co">#&gt; Processing block 1/6 ... OK</span>
 <span class="co">#&gt; Processing block 2/6 ... OK</span>
@@ -1709,7 +1712,7 @@
 <span class="co">#&gt; Processing block 5/6 ... OK</span>
 <span class="co">#&gt; Processing block 6/6 ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;  15.315   1.035  16.353</span></pre></body></html></div>
+<span class="co">#&gt;  18.393   1.066  19.464</span></pre></body></html></div>
 </div>
 <div id="process-save-repeat" class="section level3">
 <h3 class="hasAnchor">
@@ -1787,7 +1790,7 @@
 <span class="co">#&gt; Processing block 8/9 ... OK</span>
 <span class="co">#&gt; Processing block 9/9 ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   6.561   0.800   7.364</span>
+<span class="co">#&gt;   7.672   0.764   8.446</span>
 
 <span class="co"># NOTE: Increasing the block size 10-fold.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/blockGrid.html">setAutoBlockSize</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/blockGrid.html">getAutoBlockSize</a></span>() * <span class="fl">10</span>)
@@ -1795,7 +1798,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="fu">counts</span>(<span class="no">sce</span>, <span class="kw">withDimnames</span> <span class="kw">=</span> <span class="fl">FALSE</span>)))
 <span class="co">#&gt; Processing block 1/1 ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   8.488   1.002   9.491</span>
+<span class="co">#&gt;   8.103   0.938   9.042</span>
 
 <span class="co"># NOTE: Revert to default block size.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/blockGrid.html">setAutoBlockSize</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/blockGrid.html">getAutoBlockSize</a></span>() / <span class="fl">10</span>)
@@ -1828,14 +1831,14 @@
 <span class="co">#&gt; Processing block 3/4 ... OK</span>
 <span class="co">#&gt; Processing block 4/4 ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   5.113   0.469   5.583</span>
+<span class="co">#&gt;   4.716   0.624   7.634</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">x_row</span>))
 <span class="co">#&gt; Processing block 1/4 ... OK</span>
 <span class="co">#&gt; Processing block 2/4 ... OK</span>
 <span class="co">#&gt; Processing block 3/4 ... OK</span>
 <span class="co">#&gt; Processing block 4/4 ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   7.623   1.131   8.757</span></pre></body></html></div>
+<span class="co">#&gt;  10.443   1.448  11.902</span></pre></body></html></div>
 <p>Chunking can be controlled by the <code>chunkdim</code> argument when writing data to disk using the <code>writeHDF5Array()</code> or <code>saveHDF5SummarizedExperiment()</code> functions.</p>
 </div>
 <div id="parallelization-strategies" class="section level3">
@@ -1892,73 +1895,73 @@
 <span class="co">#&gt; [8] methods   base     </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; other attached packages:</span>
-<span class="co">#&gt;  [1] scater_1.17.1               ggplot2_3.3.1              </span>
-<span class="co">#&gt;  [3] scuttle_0.99.8              scran_1.17.1               </span>
-<span class="co">#&gt;  [5] TENxPBMCData_1.7.0          DelayedMatrixStats_1.11.0  </span>
-<span class="co">#&gt;  [7] TENxBrainData_1.9.0         HDF5Array_1.17.0           </span>
-<span class="co">#&gt;  [9] rhdf5_2.33.0                SingleCellExperiment_1.11.2</span>
-<span class="co">#&gt; [11] SummarizedExperiment_1.19.4 Biobase_2.49.0             </span>
-<span class="co">#&gt; [13] GenomicRanges_1.41.3        GenomeInfoDb_1.25.1        </span>
-<span class="co">#&gt; [15] DelayedArray_0.15.1         IRanges_2.23.7             </span>
-<span class="co">#&gt; [17] S4Vectors_0.27.11           BiocGenerics_0.35.3        </span>
-<span class="co">#&gt; [19] matrixStats_0.56.0         </span>
+<span class="co">#&gt;  [1] scater_1.17.2               ggplot2_3.3.1              </span>
+<span class="co">#&gt;  [3] scran_1.17.2                TENxPBMCData_1.7.0         </span>
+<span class="co">#&gt;  [5] DelayedMatrixStats_1.11.0   TENxBrainData_1.9.0        </span>
+<span class="co">#&gt;  [7] HDF5Array_1.17.2            rhdf5_2.33.3               </span>
+<span class="co">#&gt;  [9] SingleCellExperiment_1.11.4 SummarizedExperiment_1.19.5</span>
+<span class="co">#&gt; [11] Biobase_2.49.0              GenomicRanges_1.41.5       </span>
+<span class="co">#&gt; [13] GenomeInfoDb_1.25.2         DelayedArray_0.15.4        </span>
+<span class="co">#&gt; [15] IRanges_2.23.10             S4Vectors_0.27.12          </span>
+<span class="co">#&gt; [17] BiocGenerics_0.35.4         matrixStats_0.56.0         </span>
+<span class="co">#&gt; [19] Matrix_1.2-18              </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; loaded via a namespace (and not attached):</span>
 <span class="co">#&gt;   [1] ggbeeswarm_0.6.0              colorspace_1.4-1             </span>
 <span class="co">#&gt;   [3] ellipsis_0.3.1                rprojroot_1.3-2              </span>
-<span class="co">#&gt;   [5] XVector_0.29.1                BiocNeighbors_1.7.0          </span>
-<span class="co">#&gt;   [7] fs_1.4.1                      DT_0.13                      </span>
-<span class="co">#&gt;   [9] gh_1.1.0                      bit64_0.9-7                  </span>
-<span class="co">#&gt;  [11] interactiveDisplayBase_1.27.5 AnnotationDbi_1.51.0         </span>
-<span class="co">#&gt;  [13] fansi_0.4.1                   xml2_1.3.2                   </span>
-<span class="co">#&gt;  [15] knitr_1.28                    jsonlite_1.6.1               </span>
-<span class="co">#&gt;  [17] dbplyr_1.4.4                  graph_1.67.1                 </span>
-<span class="co">#&gt;  [19] shiny_1.4.0.2                 BiocManager_1.30.10          </span>
-<span class="co">#&gt;  [21] readr_1.3.1                   compiler_4.0.0               </span>
-<span class="co">#&gt;  [23] httr_1.4.1                    dqrng_0.2.1                  </span>
-<span class="co">#&gt;  [25] backports_1.1.7               assertthat_0.2.1             </span>
-<span class="co">#&gt;  [27] Matrix_1.2-18                 fastmap_1.0.1                </span>
-<span class="co">#&gt;  [29] limma_3.45.0                  cli_2.0.2                    </span>
-<span class="co">#&gt;  [31] later_1.0.0                   BiocSingular_1.5.0           </span>
+<span class="co">#&gt;   [5] scuttle_0.99.9                XVector_0.29.2               </span>
+<span class="co">#&gt;   [7] BiocNeighbors_1.7.0           fs_1.4.1                     </span>
+<span class="co">#&gt;   [9] DT_0.13                       gh_1.1.0                     </span>
+<span class="co">#&gt;  [11] bit64_0.9-7                   interactiveDisplayBase_1.27.5</span>
+<span class="co">#&gt;  [13] AnnotationDbi_1.51.0          fansi_0.4.1                  </span>
+<span class="co">#&gt;  [15] xml2_1.3.2                    knitr_1.28                   </span>
+<span class="co">#&gt;  [17] jsonlite_1.6.1                dbplyr_1.4.4                 </span>
+<span class="co">#&gt;  [19] graph_1.67.1                  shiny_1.4.0.2                </span>
+<span class="co">#&gt;  [21] BiocManager_1.30.10           readr_1.3.1                  </span>
+<span class="co">#&gt;  [23] compiler_4.0.0                httr_1.4.1                   </span>
+<span class="co">#&gt;  [25] dqrng_0.2.1                   backports_1.1.7              </span>
+<span class="co">#&gt;  [27] assertthat_0.2.1              fastmap_1.0.1                </span>
+<span class="co">#&gt;  [29] limma_3.45.7                  cli_2.0.2                    </span>
+<span class="co">#&gt;  [31] later_1.1.0.1                 BiocSingular_1.5.0           </span>
 <span class="co">#&gt;  [33] htmltools_0.4.0               tools_4.0.0                  </span>
 <span class="co">#&gt;  [35] rsvd_1.0.3                    igraph_1.2.5                 </span>
 <span class="co">#&gt;  [37] gtable_0.3.0                  glue_1.4.1                   </span>
 <span class="co">#&gt;  [39] GenomeInfoDbData_1.2.3        dplyr_1.0.0                  </span>
 <span class="co">#&gt;  [41] rappdirs_0.3.1                Rcpp_1.0.4.6                 </span>
-<span class="co">#&gt;  [43] pkgdown_1.5.1                 vctrs_0.3.0                  </span>
-<span class="co">#&gt;  [45] ExperimentHub_1.15.0          xfun_0.14                    </span>
-<span class="co">#&gt;  [47] stringr_1.4.0                 beachmat_2.5.0               </span>
-<span class="co">#&gt;  [49] rvest_0.3.5                   mime_0.9                     </span>
-<span class="co">#&gt;  [51] lifecycle_0.2.0               irlba_2.3.3                  </span>
-<span class="co">#&gt;  [53] statmod_1.4.34                XML_3.99-0.3                 </span>
-<span class="co">#&gt;  [55] AnnotationHub_2.21.0          edgeR_3.31.3                 </span>
-<span class="co">#&gt;  [57] scales_1.1.1                  zlibbioc_1.35.0              </span>
-<span class="co">#&gt;  [59] MASS_7.3-51.5                 BiocPkgTools_1.7.0           </span>
-<span class="co">#&gt;  [61] BiocStyle_2.17.0              hms_0.5.3                    </span>
-<span class="co">#&gt;  [63] promises_1.1.0                rex_1.2.0                    </span>
-<span class="co">#&gt;  [65] RBGL_1.65.0                   yaml_2.2.1                   </span>
-<span class="co">#&gt;  [67] curl_4.3                      gridExtra_2.3                </span>
-<span class="co">#&gt;  [69] memoise_1.1.0                 stringi_1.4.6                </span>
-<span class="co">#&gt;  [71] RSQLite_2.2.0                 BiocVersion_3.12.0           </span>
-<span class="co">#&gt;  [73] desc_1.2.0                    BiocParallel_1.23.0          </span>
-<span class="co">#&gt;  [75] rlang_0.4.6                   pkgconfig_2.0.3              </span>
-<span class="co">#&gt;  [77] bitops_1.0-6                  evaluate_0.14                </span>
-<span class="co">#&gt;  [79] lattice_0.20-41               purrr_0.3.4                  </span>
-<span class="co">#&gt;  [81] Rhdf5lib_1.11.0               htmlwidgets_1.5.1            </span>
-<span class="co">#&gt;  [83] bit_1.1-15.2                  tidyselect_1.1.0             </span>
-<span class="co">#&gt;  [85] magrittr_1.5                  R6_2.4.1                     </span>
-<span class="co">#&gt;  [87] generics_0.0.2                RUnit_0.4.32                 </span>
-<span class="co">#&gt;  [89] DBI_1.1.0                     withr_2.2.0                  </span>
-<span class="co">#&gt;  [91] pillar_1.4.4                  biocViews_1.57.0             </span>
-<span class="co">#&gt;  [93] RCurl_1.98-1.2                tibble_3.0.1                 </span>
-<span class="co">#&gt;  [95] crayon_1.3.4                  BiocFileCache_1.13.0         </span>
-<span class="co">#&gt;  [97] rmarkdown_2.2                 viridis_0.5.1                </span>
-<span class="co">#&gt;  [99] locfit_1.5-9.4                grid_4.0.0                   </span>
-<span class="co">#&gt; [101] blob_1.2.1                    digest_0.6.25                </span>
-<span class="co">#&gt; [103] xtable_1.8-4                  tidyr_1.1.0                  </span>
-<span class="co">#&gt; [105] httpuv_1.5.3.1                munsell_0.5.0                </span>
-<span class="co">#&gt; [107] viridisLite_0.3.0             beeswarm_0.2.3               </span>
-<span class="co">#&gt; [109] vipor_0.4.5</span></pre></body></html></div>
+<span class="co">#&gt;  [43] pkgdown_1.5.1                 vctrs_0.3.1                  </span>
+<span class="co">#&gt;  [45] rhdf5filters_1.1.0            ExperimentHub_1.15.0         </span>
+<span class="co">#&gt;  [47] xfun_0.14                     stringr_1.4.0                </span>
+<span class="co">#&gt;  [49] beachmat_2.5.0                rvest_0.3.5                  </span>
+<span class="co">#&gt;  [51] mime_0.9                      lifecycle_0.2.0              </span>
+<span class="co">#&gt;  [53] irlba_2.3.3                   statmod_1.4.34               </span>
+<span class="co">#&gt;  [55] XML_3.99-0.3                  AnnotationHub_2.21.1         </span>
+<span class="co">#&gt;  [57] edgeR_3.31.4                  scales_1.1.1                 </span>
+<span class="co">#&gt;  [59] zlibbioc_1.35.0               MASS_7.3-51.5                </span>
+<span class="co">#&gt;  [61] BiocPkgTools_1.7.0            BiocStyle_2.17.0             </span>
+<span class="co">#&gt;  [63] hms_0.5.3                     promises_1.1.1               </span>
+<span class="co">#&gt;  [65] rex_1.2.0                     RBGL_1.65.0                  </span>
+<span class="co">#&gt;  [67] yaml_2.2.1                    curl_4.3                     </span>
+<span class="co">#&gt;  [69] gridExtra_2.3                 memoise_1.1.0                </span>
+<span class="co">#&gt;  [71] stringi_1.4.6                 RSQLite_2.2.0                </span>
+<span class="co">#&gt;  [73] BiocVersion_3.12.0            desc_1.2.0                   </span>
+<span class="co">#&gt;  [75] BiocParallel_1.23.0           rlang_0.4.6                  </span>
+<span class="co">#&gt;  [77] pkgconfig_2.0.3               bitops_1.0-6                 </span>
+<span class="co">#&gt;  [79] evaluate_0.14                 lattice_0.20-41              </span>
+<span class="co">#&gt;  [81] purrr_0.3.4                   Rhdf5lib_1.11.2              </span>
+<span class="co">#&gt;  [83] htmlwidgets_1.5.1             bit_1.1-15.2                 </span>
+<span class="co">#&gt;  [85] tidyselect_1.1.0              magrittr_1.5                 </span>
+<span class="co">#&gt;  [87] R6_2.4.1                      generics_0.0.2               </span>
+<span class="co">#&gt;  [89] RUnit_0.4.32                  DBI_1.1.0                    </span>
+<span class="co">#&gt;  [91] withr_2.2.0                   pillar_1.4.4                 </span>
+<span class="co">#&gt;  [93] biocViews_1.57.1              RCurl_1.98-1.2               </span>
+<span class="co">#&gt;  [95] tibble_3.0.1                  crayon_1.3.4                 </span>
+<span class="co">#&gt;  [97] BiocFileCache_1.13.0          rmarkdown_2.2                </span>
+<span class="co">#&gt;  [99] viridis_0.5.1                 locfit_1.5-9.4               </span>
+<span class="co">#&gt; [101] grid_4.0.0                    blob_1.2.1                   </span>
+<span class="co">#&gt; [103] digest_0.6.25                 xtable_1.8-4                 </span>
+<span class="co">#&gt; [105] tidyr_1.1.0                   httpuv_1.5.4                 </span>
+<span class="co">#&gt; [107] munsell_0.5.0                 viridisLite_0.3.0            </span>
+<span class="co">#&gt; [109] beeswarm_0.2.3                vipor_0.4.5</span></pre></body></html></div>
 </div>
 <div id="references" class="section level2 unnumbered">
 <h2 class="hasAnchor">
@@ -1968,7 +1971,7 @@
 <p>Lun, A. T., K. Bach, and J. C. Marioni. 2016. “Pooling across cells to normalize single-cell RNA sequencing data with many zero counts.” <em>Genome Biol.</em> 17 (April): 75.</p>
 </div>
 <div id="ref-rizzardi2019neuronal">
-<p>Rizzardi, Lindsay F, Peter F Hickey, Varenka Rodriguez DiBlasi, Rakel Tryggvadóttir, Colin M Callahan, Adrian Idrizi, Kasper D Hansen, and Andrew P Feinberg. 2019. “Neuronal Brain-Region-Specific Dna Methylation and Chromatin Accessibility Are Associated with Neuropsychiatric Trait Heritability.” <em>Nature Neuroscience</em> 22 (2). Nature Publishing Group: 307.</p>
+<p>Rizzardi, Lindsay F, Peter F Hickey, Varenka Rodriguez DiBlasi, Rakel Tryggvadóttir, Colin M Callahan, Adrian Idrizi, Kasper D Hansen, and Andrew P Feinberg. 2019. “Neuronal Brain-Region-Specific Dna Methylation and Chromatin Accessibility Are Associated with Neuropsychiatric Trait Heritability.” <em>Nature Neuroscience</em> 22 (2): 307.</p>
 </div>
 <div id="ref-zheng2017massively">
 <p>Zheng, G. X., J. M. Terry, P. Belgrader, P. Ryvkin, Z. W. Bent, R. Wilson, S. B. Ziraldo, et al. 2017. “Massively parallel digital transcriptional profiling of single cells.” <em>Nat Commun</em> 8 (January): 14049.</p>
@@ -1979,29 +1982,29 @@
 <div class="footnotes">
 <hr>
 <ol>
-<li id="fn1"><p>Including space-efficient formats like sparse arrays and run length encoded arrays<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>Higher-dimensional arrays may be appropriate for some types of assays.<a href="#fnref2" class="footnote-back">↩</a></p></li>
-<li id="fn3"><p>In R, a <em>matrix</em> is just a 2-dimensional <em>array</em><a href="#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p>You may have seen similar pretty printing with other Bioconductor objects such as <em>GRanges</em> and <em>DataFrame</em> or with the <em>data.table</em> and <em>tibble</em> extensions to the <em>data.frame</em>. I can’t say enough how much I appreciate these thoughtful touches when doing interactive data analysis.<a href="#fnref4" class="footnote-back">↩</a></p></li>
-<li id="fn5"><p>As with a 2-dimensional <em>array</em> in base R being commonly known as a <em>matrix</em>, a 2-dimensional <em>DelayedArray</em> is also known as a <em>DelayedMatrix</em> and a 2-dimensional <em>HDF5Array</em> is also known as a <em>HDF5Matrix</em>.<a href="#fnref5" class="footnote-back">↩</a></p></li>
-<li id="fn6"><p>We will revisit the <code>chunkdim</code> component of the <em>HDF5Matrix</em> object later in the workshop in <a href="#chunking">Chunking</a><a href="#fnref6" class="footnote-back">↩</a></p></li>
-<li id="fn7"><p>The technical names of each type of delayed operation are not important.<a href="#fnref7" class="footnote-back">↩</a></p></li>
-<li id="fn8"><p>The <a href="#no-op">No-op</a> example is the obvious exception<a href="#fnref8" class="footnote-back">↩</a></p></li>
-<li id="fn9"><p>Here, I use the ‘namespaced function’ notation for didactic purposes to distinguish <code><a href="https://rdrr.io/r/base/colSums.html">base::colSums()</a></code> from the S4 generic <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums()</a></code> and its associated methods. When writing code, however, it is generally not necessary to use the <code>package::function()</code> notation, except for all the times that it is …<a href="#fnref9" class="footnote-back">↩</a></p></li>
-<li id="fn10"><p>For example, recall that the <code>tenx_counts</code> data would occupy &gt; 146 GB in memory.<a href="#fnref10" class="footnote-back">↩</a></p></li>
-<li id="fn11"><p>In the following code example we could replace <code><a href="https://rdrr.io/r/base/array.html">as.array(colSums(tenx_counts_subset[, j, drop = FALSE]))</a></code> with <code><a href="https://rdrr.io/r/base/sum.html">sum(tenx_counts_subset[, j, drop = TRUE])</a></code> or, more simply, <code><a href="https://rdrr.io/r/base/sum.html">sum(tenx_counts_subset[, j])</a></code>. This is because subsetting a <em>DelayedArray</em> returns an ordinary vector when <code>drop = TRUE</code> and the result has only one dimension; see ‘Subsetting’ in <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedArray-class.html">help("DelayedArray", package = "DelayedArray")</a></code>.<a href="#fnref11" class="footnote-back">↩</a></p></li>
-<li id="fn12"><p>This may seem artificial, but suppose we were dealing with a very ‘tall’ matrix.<a href="#fnref12" class="footnote-back">↩</a></p></li>
-<li id="fn13"><p>In the above example it’s safe because <code>tenx_counts_subset_realized</code> only requires around 100 Mb of memory.<a href="#fnref13" class="footnote-back">↩</a></p></li>
-<li id="fn14"><p>The <em><a href="https://bioconductor.org/packages/3.12/TENxBrainData">TENxBrainData</a></em> package depends upon <em><a href="https://bioconductor.org/packages/3.12/HDF5Array">HDF5Array</a></em>, so it is already installed. If you’ve been following this workflow then you’ve also already attached it to the search path by running <code><a href="https://rdrr.io/pkg/TENxBrainData/man">library(TENxBrainData)</a></code>.<a href="#fnref14" class="footnote-back">↩</a></p></li>
-<li id="fn15"><p>We’ll discuss why you might want this in the second half of the workshop.<a href="#fnref15" class="footnote-back">↩</a></p></li>
-<li id="fn16"><p>In fact, if you use any package that makes use of the <em>SummarizedExperiment</em> class, then you will almost certainly load the <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> package during the course of your analysis, whether you know it or not! This is because <em><a href="https://bioconductor.org/packages/3.12/SummarizedExperiment">SummarizedExperiment</a></em> depends upon <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em>.<a href="#fnref16" class="footnote-back">↩</a></p></li>
-<li id="fn17"><p>As listed in the <code>Depends</code> field of the package <code>DESCRIPTION</code> file.<a href="#fnref17" class="footnote-back">↩</a></p></li>
-<li id="fn18"><p>This is adapted from the <em><a href="https://bioconductor.org/packages/3.12/simpleSingleCell">simpleSingleCell</a></em> workflow.<a href="#fnref18" class="footnote-back">↩</a></p></li>
-<li id="fn19"><p>For the sake of time, we’re going to cheat by loading the counts matrix into memory as a sparse matrix and computing the clustering using the in-memory data. But this functionality does work, albeit more slowly, for the HDF5-backed data.<a href="#fnref19" class="footnote-back">↩</a></p></li>
-<li id="fn20"><p>The reality is a little bit more nuanced, but discussing the full details is not important here, and would only distract us<a href="#fnref20" class="footnote-back">↩</a></p></li>
-<li id="fn21"><p>A <em>SummarizedExperiment</em> derivative<a href="#fnref21" class="footnote-back">↩</a></p></li>
-<li id="fn22"><p>Chunking also applies to other storage formats, such as <em>RleArray</em> objects, but we’ll focus on the HDF5 format.<a href="#fnref22" class="footnote-back">↩</a></p></li>
-<li id="fn23"><p>Unfortunately, simply typing the function name at the command prompt or using <code><a href="https://rdrr.io/r/base/args.html">args()</a></code> may not be sufficient to identify these functions. E.g., <code><a href="https://rdrr.io/r/base/args.html">args(denoisePCA)</a></code> doesn’t include <code>BPPARAM</code> but <code><a href="https://rdrr.io/pkg/scran/man/denoisePCA.html">help("denoisePCA", "scran")</a></code> tells you this is an option (Footnote to the footnote: this is because <code>denoicePCA()</code> is an S4 generic with methods defined only for the first argument, <code>x</code>. The methods include the <code>BPPARAM</code> argument and are documented as such.)<a href="#fnref23" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p>Including space-efficient formats like sparse arrays and run length encoded arrays<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>Higher-dimensional arrays may be appropriate for some types of assays.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>In R, a <em>matrix</em> is just a 2-dimensional <em>array</em><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>You may have seen similar pretty printing with other Bioconductor objects such as <em>GRanges</em> and <em>DataFrame</em> or with the <em>data.table</em> and <em>tibble</em> extensions to the <em>data.frame</em>. I can’t say enough how much I appreciate these thoughtful touches when doing interactive data analysis.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>As with a 2-dimensional <em>array</em> in base R being commonly known as a <em>matrix</em>, a 2-dimensional <em>DelayedArray</em> is also known as a <em>DelayedMatrix</em> and a 2-dimensional <em>HDF5Array</em> is also known as a <em>HDF5Matrix</em>.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>We will revisit the <code>chunkdim</code> component of the <em>HDF5Matrix</em> object later in the workshop in <a href="#chunking">Chunking</a><a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>The technical names of each type of delayed operation are not important.<a href="#fnref7" class="footnote-back">↩︎</a></p></li>
+<li id="fn8"><p>The <a href="#no-op">No-op</a> example is the obvious exception<a href="#fnref8" class="footnote-back">↩︎</a></p></li>
+<li id="fn9"><p>Here, I use the ‘namespaced function’ notation for didactic purposes to distinguish <code><a href="https://rdrr.io/r/base/colSums.html">base::colSums()</a></code> from the S4 generic <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums()</a></code> and its associated methods. When writing code, however, it is generally not necessary to use the <code>package::function()</code> notation, except for all the times that it is …<a href="#fnref9" class="footnote-back">↩︎</a></p></li>
+<li id="fn10"><p>For example, recall that the <code>tenx_counts</code> data would occupy &gt; 146 GB in memory.<a href="#fnref10" class="footnote-back">↩︎</a></p></li>
+<li id="fn11"><p>In the following code example we could replace <code><a href="https://rdrr.io/r/base/array.html">as.array(colSums(tenx_counts_subset[, j, drop = FALSE]))</a></code> with <code><a href="https://rdrr.io/r/base/sum.html">sum(tenx_counts_subset[, j, drop = TRUE])</a></code> or, more simply, <code><a href="https://rdrr.io/r/base/sum.html">sum(tenx_counts_subset[, j])</a></code>. This is because subsetting a <em>DelayedArray</em> returns an ordinary vector when <code>drop = TRUE</code> and the result has only one dimension; see ‘Subsetting’ in <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedArray-class.html">help("DelayedArray", package = "DelayedArray")</a></code>.<a href="#fnref11" class="footnote-back">↩︎</a></p></li>
+<li id="fn12"><p>This may seem artificial, but suppose we were dealing with a very ‘tall’ matrix.<a href="#fnref12" class="footnote-back">↩︎</a></p></li>
+<li id="fn13"><p>In the above example it’s safe because <code>tenx_counts_subset_realized</code> only requires around 100 Mb of memory.<a href="#fnref13" class="footnote-back">↩︎</a></p></li>
+<li id="fn14"><p>The <em><a href="https://bioconductor.org/packages/3.12/TENxBrainData">TENxBrainData</a></em> package depends upon <em><a href="https://bioconductor.org/packages/3.12/HDF5Array">HDF5Array</a></em>, so it is already installed. If you’ve been following this workflow then you’ve also already attached it to the search path by running <code><a href="https://rdrr.io/pkg/TENxBrainData/man">library(TENxBrainData)</a></code>.<a href="#fnref14" class="footnote-back">↩︎</a></p></li>
+<li id="fn15"><p>We’ll discuss why you might want this in the second half of the workshop.<a href="#fnref15" class="footnote-back">↩︎</a></p></li>
+<li id="fn16"><p>In fact, if you use any package that makes use of the <em>SummarizedExperiment</em> class, then you will almost certainly load the <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> package during the course of your analysis, whether you know it or not! This is because <em><a href="https://bioconductor.org/packages/3.12/SummarizedExperiment">SummarizedExperiment</a></em> depends upon <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em>.<a href="#fnref16" class="footnote-back">↩︎</a></p></li>
+<li id="fn17"><p>As listed in the <code>Depends</code> field of the package <code>DESCRIPTION</code> file.<a href="#fnref17" class="footnote-back">↩︎</a></p></li>
+<li id="fn18"><p>This is adapted from the <em><a href="https://bioconductor.org/packages/3.12/simpleSingleCell">simpleSingleCell</a></em> workflow.<a href="#fnref18" class="footnote-back">↩︎</a></p></li>
+<li id="fn19"><p>For the sake of time, we’re going to cheat by loading the counts matrix into memory as a sparse matrix and computing the clustering using the in-memory data. But this functionality does work, albeit more slowly, for the HDF5-backed data.<a href="#fnref19" class="footnote-back">↩︎</a></p></li>
+<li id="fn20"><p>The reality is a little bit more nuanced, but discussing the full details is not important here, and would only distract us<a href="#fnref20" class="footnote-back">↩︎</a></p></li>
+<li id="fn21"><p>A <em>SummarizedExperiment</em> derivative<a href="#fnref21" class="footnote-back">↩︎</a></p></li>
+<li id="fn22"><p>Chunking also applies to other storage formats, such as <em>RleArray</em> objects, but we’ll focus on the HDF5 format.<a href="#fnref22" class="footnote-back">↩︎</a></p></li>
+<li id="fn23"><p>Unfortunately, simply typing the function name at the command prompt or using <code><a href="https://rdrr.io/r/base/args.html">args()</a></code> may not be sufficient to identify these functions. E.g., <code><a href="https://rdrr.io/r/base/args.html">args(denoisePCA)</a></code> doesn’t include <code>BPPARAM</code> but <code><a href="https://rdrr.io/pkg/scran/man/denoisePCA.html">help("denoisePCA", "scran")</a></code> tells you this is an option (Footnote to the footnote: this is because <code>denoicePCA()</code> is an S4 generic with methods defined only for the first argument, <code>x</code>. The methods include the <code>BPPARAM</code> argument and are documented as such.)<a href="#fnref23" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
   </div>
