@@ -30,4 +30,4 @@ Suggests:
 License: Artistic-2.0
 VignetteBuilder: knitr
 Encoding: UTF-8
-DockerImage: PeteHaitch/BioC2020_DelayedArray_workshop:latest
+DockerImage: petehaitch/bioc2020_delayedarray_workshop:latest
