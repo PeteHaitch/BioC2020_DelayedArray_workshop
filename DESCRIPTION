@@ -13,16 +13,14 @@ Description: This workshop will teach the fundamental concepts underlying the
   DelayedArray framework and related infrastructure. 
 Imports:
   DelayedArray,
-  TENxBrainData,
+  ExperimentHub,
   DelayedMatrixStats,
   BiocPkgTools,
   rmarkdown,
   BiocStyle,
   rhdf5,
-  TENxPBMCData,
+  SingleCellExperiment,
   scuttle,
-  scran,
-  igraph
 Suggests: 
     knitr,
     pkgdown
