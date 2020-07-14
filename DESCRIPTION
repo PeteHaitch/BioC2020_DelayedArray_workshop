@@ -15,13 +15,12 @@ Imports:
   DelayedArray,
   TENxBrainData,
   DelayedMatrixStats,
-  bench,
   BiocPkgTools,
   rmarkdown,
   BiocStyle,
   rhdf5,
   TENxPBMCData,
-  scater,
+  scuttle,
   scran,
   igraph
 Suggests: 
