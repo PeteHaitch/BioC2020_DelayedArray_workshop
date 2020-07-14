@@ -8,7 +8,7 @@ Authors@R: c(
   role = c("aut", "cre"),
   email = "peter.hickey@gmail.com",
   comment = c(ORCID = "0000-0002-8153-6258")))
-Version: 0.99.4
+Version: 0.99.5
 Description: This workshop will teach the fundamental concepts underlying the 
   DelayedArray framework and related infrastructure. 
 Imports:
