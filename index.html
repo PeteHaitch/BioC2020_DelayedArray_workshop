@@ -87,12 +87,14 @@
 <div id="workshop-description" class="section level2">
 <h2 class="hasAnchor">
 <a href="#workshop-description" class="anchor"></a>Workshop description</h2>
-<p>This workshop gives an introductory overview of the DelayedArray framework, which can be used by Bioconductor packages to support the analysis of large datasets. A <em>DelayedArray</em> is like an ordinary array in R, but allows for the data to be in-memory (including space-efficient formats like sparse arrays and run length encoded arrays), on-disk in a file, or even hosted on a remote server. Participants will learn where they might encounter a <em>DelayedArray</em> in the wild while using Bioconductor and help them understand the fundamental concepts underlying the framework. This workshop will be a mixture of lecture with example code and discussion. Examples will mostly be drawn from the analysis of single-cell RNA-sequencing data.</p>
+<p>This workshop gives an introductory overview of the DelayedArray framework, which can be used by R / Bioconductor packages to support the analysis of large array-like datasets. A <em>DelayedArray</em> is like an ordinary array in R, but allows for the data to be in-memory, on-disk in a file, or even hosted on a remote server.</p>
+<p>Workshop participants will learn where they might encounter a <em>DelayedArray</em> in the wild while using Bioconductor and help them understand the fundamental concepts underlying the framework. This workshop will feature <a href="https://docs.google.com/presentation/d/1_v4IuKLFs781pp7x0BwUxv7mwCfPLBTWu320g3lQmME/edit?usp=sharing">introductory material</a>, ‘live’ coding, and Q&amp;A.</p>
 <div id="instructor" class="section level3">
 <h3 class="hasAnchor">
 <a href="#instructor" class="anchor"></a>Instructor</h3>
 <ul>
-<li>Peter Hickey (<a href="mailto:hickey@wehi.edu.au" class="email">hickey@wehi.edu.au</a>)</li>
+<li>
+<a href="https://peterhickey.org/">Peter Hickey</a> (<a href="mailto:hickey@wehi.edu.au" class="email">hickey@wehi.edu.au</a>)</li>
 </ul>
 </div>
 <div id="pre-requisites" class="section level3">
@@ -102,27 +104,24 @@
 <li>Basic knowledge of R syntax.</li>
 <li>Familiarity with common operations on matrices in R, such as <code><a href="https://rdrr.io/r/base/colSums.html">colSums()</a></code> and <code><a href="https://rdrr.io/r/base/colSums.html">colMeans()</a></code>.</li>
 <li>Some familiarity with S4 objects may be helpful but is not required.</li>
-<li>Some familiarity with single-cell RNA-sequencing may be helpful but is not required.</li>
 </ul>
 </div>
 <div id="workshop-participation" class="section level3">
 <h3 class="hasAnchor">
 <a href="#workshop-participation" class="anchor"></a>Workshop Participation</h3>
-<p>Students will be able to run code interactively during the workshop. There will be opportunities throughout the workshop for questions and discussion.</p>
+<p>Students will be able to run code examples from the workshop material. There will be a Q&amp;A session in the second half of the workshop.</p>
 </div>
 <div id="r--bioconductor-packages-used" class="section level3">
 <h3 class="hasAnchor">
 <a href="#r--bioconductor-packages-used" class="anchor"></a><em>R</em> / <em>Bioconductor</em> packages used</h3>
+<p>These packages are the focus of this workshop:</p>
 <ul>
-<li><em><a href="https://bioconductor.org/packages/3.11/DelayedArray">DelayedArray</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/HDF5Array">HDF5Array</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/DelayedMatrixStats">DelayedMatrixStats</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/TENxBrainData">TENxBrainData</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/TENxPBMCData">TENxPBMCData</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/BiocSingular">BiocSingular</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/scater">scater</a></em></li>
-<li><em><a href="https://bioconductor.org/packages/3.11/scran">scran</a></em></li>
+<li><em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em></li>
+<li><em><a href="https://bioconductor.org/packages/3.12/HDF5Array">HDF5Array</a></em></li>
+<li><em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em></li>
 </ul>
+<p>Please see the workshop <code>DESCRIPTION</code> for a full list of dependencies.</p>
+<p><strong>TODO</strong>: Check for any other packages with extensive usage.</p>
 </div>
 <div id="time-outline" class="section level3">
 <h3 class="hasAnchor">
@@ -135,23 +134,19 @@
 <tbody>
 <tr class="odd">
 <td>Introductory material</td>
-<td>10m</td>
+<td>5 min</td>
 </tr>
 <tr class="even">
 <td>First contact</td>
-<td>40m</td>
-</tr>
-<tr class="odd">
-<td>Package ecosystem</td>
-<td>10m</td>
-</tr>
-<tr class="even">
-<td>Real world encounters analysing scRNA-seq data</td>
-<td>25m</td>
+<td>20 min</td>
 </tr>
 <tr class="odd">
 <td>Workflow tips for DelayedArray-backed analyses</td>
-<td>15m</td>
+<td>15 min</td>
+</tr>
+<tr class="even">
+<td>Q&amp;A</td>
+<td>15 min</td>
 </tr>
 </tbody>
 </table>
@@ -166,7 +161,7 @@
 <li>Learn of existing packages and functions that <em>use</em> the DelayedArray framework.</li>
 <li>Develop a high-level understanding of classes and packages that <em>implement</em> the DelayedArray framework.</li>
 <li>Become familiar with the fundamental concepts of delayed operations, block-processing, and realization.</li>
-<li>Reason about potential bottlenecks in algorithms operating on <em>DelayedArray</em> objects.</li>
+<li>Reason about potential bottlenecks, and how to avoid or reduce these, in algorithms operating on <em>DelayedArray</em> objects.</li>
 </ul>
 </div>
 <div id="learning-objectives" class="section level4">

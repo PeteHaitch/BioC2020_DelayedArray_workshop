@@ -192,7 +192,7 @@
 <p><strong>TODO</strong>: Make this material into slides?</p>
 <p>Data from a high-throughput biological assay, such as single-cell RNA-sequencing (scRNA-seq), will often be summarised as a matrix of counts, where rows correspond to features and columns to samples<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Within <strong>Bioconductor</strong>, the <em>SummarizedExperiment</em> class is the recommended container for such data, offering a rich interface that tightly links assay measurements to data on the features and the samples.</p>
 <p>The <em>SummarizedExperiment</em> class is used to store rectangular arrays of experimental results (<em>assays</em>). Here, each <em>assay</em> is drawn as a matrix but higher-dimensional arrays are also supported.</p>
-<p><img src="../../../../tmp/RtmpRIGq38/SE.svg"><!-- --></p>
+<p><img src="../../../../tmp/Rtmpxvdn4M/SE.svg"><!-- --></p>
 <p>Traditionally, the assay data are stored in-memory as an ordinary <em>array</em> object<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. Storing the data in-memory becomes a real pain with the ever-growing size of ’omics datasets. It is now not uncommon to collect <span class="math inline">\(10,000-100,000,000\)</span> measurements on <span class="math inline">\(100 - 1,000,000\)</span> samples, which would occupy <span class="math inline">\(10-1,000\)</span> gigabytes (Gb) if stored in-memory as ordinary R arrays.</p>
 <p>The DelayedArray framework offers a solution to this problem. Wrapping an array-like object (typically an on-disk object) in a <em>DelayedArray</em> object allows one to perform common array operations on it without loading the object in memory. In order to reduce memory usage and optimize performance, operations on the object are either delayed or executed using a block processing mechanism.</p>
 <div id="projects-enabled-by-delayedarray" class="section level3">
@@ -257,7 +257,7 @@
 <span class="co">#&gt; Loading required package: BiocFileCache</span>
 <span class="co">#&gt; Loading required package: dbplyr</span>
 <span class="no">hub</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ExperimentHub/man/ExperimentHub-class.html">ExperimentHub</a></span>()
-<span class="co">#&gt; using temporary cache /tmp/RtmpRIGq38/BiocFileCache</span>
+<span class="co">#&gt; using temporary cache /tmp/Rtmpxvdn4M/BiocFileCache</span>
 <span class="co">#&gt; snapshotDate(): 2020-07-10</span>
 
 <span class="co"># Query ExperimentHub to find the relevant resource.</span>
@@ -357,7 +357,7 @@
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/RtmpRIGq38/BiocFileCache/b8e57bd847bf_1040"</span>
+<span class="co">#&gt; [1] "/tmp/Rtmpxvdn4M/BiocFileCache/4391bea75cf_1040"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "counts"</span>
@@ -932,7 +932,7 @@
 <h4 class="hasAnchor">
 <a href="#block-processing-illustrated" class="anchor"></a>Block-processing illustrated</h4>
 <p>Some examples of block-processing are illustrated in the following figures:</p>
-<p><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide1.png"><!-- --><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide2.png"><!-- --><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide3.png"><!-- --><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide4.png"><!-- --><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide5.png"><!-- --><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide6.png"><!-- --><img src="../../../../tmp/RtmptjpV0Y/temp_libpathb8837e5e1bc7/DelayedArrayWorkshop/vignettes/Slide7.png"><!-- --></p>
+<p><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide1.png"><!-- --><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide2.png"><!-- --><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide3.png"><!-- --><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide4.png"><!-- --><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide5.png"><!-- --><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide6.png"><!-- --><img src="../../../../tmp/RtmpyLd6YR/temp_libpath3d7ac9e510/DelayedArrayWorkshop/vignettes/Slide7.png"><!-- --></p>
 </div>
 <div id="block-processed-column-sums" class="section level4">
 <h4 class="hasAnchor">
@@ -1087,8 +1087,8 @@
 <span class="co">#&gt; └─ 27998x1000 integer: [seed] HDF5ArraySeed object</span></pre></body></html></div>
 <p>Used like this, <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array()</a></code> and <code>as(..., "HDF5Array")</code> will write their results to a file in <em>HDF5 dump directory</em>, a dumping ground for automatically created HDF5 datasets. We can see a log of the operations that have written to the HDF5 dump directory using <code><a href="https://rdrr.io/pkg/HDF5Array/man/dump-management.html">showHDF5DumpLog()</a></code>.</p>
 <div class="sourceCode" id="cb35"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/dump-management.html">showHDF5DumpLog</a></span>()
-<span class="co">#&gt; [2020-07-14 08:15:59] #1 In file '/tmp/RtmpRIGq38/HDF5Array_dump/auto00001.h5': creation of dataset '/HDF5ArrayAUTO00001' (27998x1000:integer, chunkdims=5291x188, level=6)</span>
-<span class="co">#&gt; [2020-07-14 08:16:02] #2 In file '/tmp/RtmpRIGq38/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002' (27998x1000:integer, chunkdims=5291x188, level=6)</span></pre></body></html></div>
+<span class="co">#&gt; [2020-07-14 09:50:46] #1 In file '/tmp/Rtmpxvdn4M/HDF5Array_dump/auto00001.h5': creation of dataset '/HDF5ArrayAUTO00001' (27998x1000:integer, chunkdims=5291x188, level=6)</span>
+<span class="co">#&gt; [2020-07-14 09:50:49] #2 In file '/tmp/Rtmpxvdn4M/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002' (27998x1000:integer, chunkdims=5291x188, level=6)</span></pre></body></html></div>
 <p>Often, however, we will want full control of where and how the data are written to the HDF5 file<a href="#fn15" class="footnote-ref" id="fnref15"><sup>15</sup></a> and the <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array()</a></code> function gives you full control over this and more.</p>
 <div class="sourceCode" id="cb36"><html><body><pre class="r"><span class="co"># Write the data to a user-specified HDF5 file using maximum compression and </span>
 <span class="co"># 'chunking' along the columns.</span>
@@ -1105,7 +1105,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_subset_hdf5</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/RtmpRIGq38/HDF5Array_dump/auto00001.h5"</span>
+<span class="co">#&gt; [1] "/tmp/Rtmpxvdn4M/HDF5Array_dump/auto00001.h5"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "/HDF5ArrayAUTO00001"</span>
@@ -1124,7 +1124,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_subset_my_file_hdf5</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/RtmpRIGq38/fileb8e57f0b73d9.h5"</span>
+<span class="co">#&gt; [1] "/tmp/Rtmpxvdn4M/file4394ebec975.h5"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "/HDF5ArrayAUTO00003"</span>
@@ -1493,7 +1493,7 @@
 <div class="sourceCode" id="cb48"><html><body><pre class="r"><span class="no">dir</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span>(), <span class="st">"my_h5_se"</span>)
 <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/saveHDF5SummarizedExperiment.html">saveHDF5SummarizedExperiment</a></span>(<span class="no">sce</span>, <span class="no">dir</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="co">#&gt; Start writing assay 1/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpRIGq38/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpxvdn4M/my_h5_se/assays.h5</span>
 <span class="co">#&gt; Realizing block 1/17 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 2/17 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 3/17 ... OK, writing it ... OK</span>
@@ -1512,10 +1512,10 @@
 <span class="co">#&gt; Realizing block 16/17 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 17/17 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Finished writing assay 1/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpRIGq38/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpxvdn4M/my_h5_se/assays.h5</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Start writing assay 2/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpRIGq38/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpxvdn4M/my_h5_se/assays.h5</span>
 <span class="co">#&gt; Realizing block 1/34 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 2/34 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 3/34 ... OK, writing it ... OK</span>
@@ -1551,10 +1551,10 @@
 <span class="co">#&gt; Realizing block 33/34 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 34/34 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Finished writing assay 2/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpRIGq38/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/Rtmpxvdn4M/my_h5_se/assays.h5</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Serialize SingleCellExperiment object to RDS file:</span>
-<span class="co">#&gt;   /tmp/RtmpRIGq38/my_h5_se/se.rds</span>
+<span class="co">#&gt;   /tmp/Rtmpxvdn4M/my_h5_se/se.rds</span>
 
 <span class="co"># There are no delayed operations on the saved version.</span>
 <span class="no">saved_sce</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/saveHDF5SummarizedExperiment.html">loadHDF5SummarizedExperiment</a></span>(<span class="no">dir</span>)
@@ -1619,7 +1619,7 @@
 <span class="co">#&gt; Processing block [[5/6, 2/2]] ... OK</span>
 <span class="co">#&gt; Processing block [[6/6, 2/2]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   3.213   0.642   3.856</span>
+<span class="co">#&gt;   3.686   0.586   4.273</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">y</span>))
 <span class="co">#&gt; Processing block [[1/6, 1/2]] ... OK</span>
 <span class="co">#&gt; Processing block [[2/6, 1/2]] ... OK</span>
@@ -1634,7 +1634,7 @@
 <span class="co">#&gt; Processing block [[5/6, 2/2]] ... OK</span>
 <span class="co">#&gt; Processing block [[6/6, 2/2]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;  42.855   1.716  44.578</span></pre></body></html></div>
+<span class="co">#&gt;  46.379   1.941  48.331</span></pre></body></html></div>
 </div>
 <div id="process-save-repeat" class="section level3">
 <h3 class="hasAnchor">
@@ -1729,7 +1729,7 @@
 <span class="co">#&gt; Processing block [[5/6, 2/2]] ... OK</span>
 <span class="co">#&gt; Processing block [[6/6, 2/2]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   3.318   0.584   3.902</span>
+<span class="co">#&gt;   3.621   0.720   4.341</span>
 
 <span class="co"># Increasing the block size 10-fold.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">setAutoBlockSize</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">getAutoBlockSize</a></span>() * <span class="fl">10</span>)
@@ -1738,7 +1738,7 @@
 <span class="co">#&gt; Processing block [[1/2, 1/1]] ... OK</span>
 <span class="co">#&gt; Processing block [[2/2, 1/1]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   3.710   0.601   4.312</span>
+<span class="co">#&gt;   4.033   0.656   4.690</span>
 <span class="co"># Reverting to default block size.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">setAutoBlockSize</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">getAutoBlockSize</a></span>() / <span class="fl">10</span>)
 <span class="co">#&gt; automatic block size set to 1e+08 bytes (was 1e+09)</span>
@@ -1874,7 +1874,7 @@
 <span class="co">#&gt; Processing block [[17/18, 7/7]] ... OK</span>
 <span class="co">#&gt; Processing block [[18/18, 7/7]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   5.663   0.463   6.127</span>
+<span class="co">#&gt;   6.186   0.510   6.698</span>
 <span class="co"># Reverting to default block size.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">setAutoBlockSize</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">getAutoBlockSize</a></span>() / <span class="fl">10</span>)
 <span class="co">#&gt; automatic block size set to 1e+06 bytes (was 1e+07)</span></pre></body></html></div>
@@ -2497,7 +2497,7 @@
 <span class="co">#&gt; Processing block [[1/1, 99/100]] ... OK</span>
 <span class="co">#&gt; Processing block [[1/1, 100/100]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   2.555   0.088   2.644</span>
+<span class="co">#&gt;   2.790   0.128   2.918</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">x_row</span>))
 <span class="co">#&gt; Processing block [[1/400, 1/1]] ... OK</span>
 <span class="co">#&gt; Processing block [[2/400, 1/1]] ... OK</span>
@@ -2900,7 +2900,7 @@
 <span class="co">#&gt; Processing block [[399/400, 1/1]] ... OK</span>
 <span class="co">#&gt; Processing block [[400/400, 1/1]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;  10.808   1.021  11.832</span></pre></body></html></div>
+<span class="co">#&gt;  11.978   1.103  13.083</span></pre></body></html></div>
 <p>Chunking can be controlled by the <code>chunkdim</code> argument when writing data to disk using the <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array()</a></code> or <code><a href="https://rdrr.io/pkg/HDF5Array/man/saveHDF5SummarizedExperiment.html">saveHDF5SummarizedExperiment()</a></code> functions.</p>
 <p><strong>TODO</strong>: Comment on similar functionality in TileDBArray?</p>
 </div>
