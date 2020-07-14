@@ -49,11 +49,15 @@ There will be a Q&A session in the second half of the workshop.
 
 ### *R* / *Bioconductor* packages used
 
+These packages are the focus of this workshop:
+
 - `r BiocStyle::Biocpkg("DelayedArray")`
 - `r BiocStyle::Biocpkg("HDF5Array")`
 - `r BiocStyle::Biocpkg("DelayedMatrixStats")`
-- `r BiocStyle::Githubpkg("LTLA/TileDBArray")`
-- **TODO**: Check for additional packages
+
+Please see the workshop `DESCRIPTION` for a full list of dependencies.
+
+**TODO**: Check for any other packages with extensive usage.
 
 ### Time outline
 

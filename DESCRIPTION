@@ -13,6 +13,7 @@ Description: This workshop will teach the fundamental concepts underlying the
   DelayedArray framework and related infrastructure. 
 Imports:
   DelayedArray,
+  HDF5Array,
   ExperimentHub,
   DelayedMatrixStats,
   BiocPkgTools,
@@ -21,8 +22,8 @@ Imports:
   rhdf5,
   SingleCellExperiment,
   scuttle,
-Suggests: 
-    knitr,
+  knitr
+Suggests:
     pkgdown
 License: Artistic-2.0
 VignetteBuilder: knitr
