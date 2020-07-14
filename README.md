@@ -12,20 +12,21 @@ status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/.
 ## Workshop description
 
 This workshop gives an introductory overview of the DelayedArray
-framework, which can be used by Bioconductor packages to support the
-analysis of large datasets. A *DelayedArray* is like an ordinary array
-in R, but allows for the data to be in-memory (including space-efficient
-formats like sparse arrays and run length encoded arrays), on-disk in a
-file, or even hosted on a remote server. Participants will learn where
-they might encounter a *DelayedArray* in the wild while using
-Bioconductor and help them understand the fundamental concepts
-underlying the framework. This workshop will be a mixture of lecture
-with example code and discussion. Examples will mostly be drawn from the
-analysis of single-cell RNA-sequencing data.
+framework, which can be used by R / Bioconductor packages to support the
+analysis of large array-like datasets. A *DelayedArray* is like an
+ordinary array in R, but allows for the data to be in-memory, on-disk in
+a file, or even hosted on a remote server.
+
+Workshop participants will learn where they might encounter a
+*DelayedArray* in the wild while using Bioconductor and help them
+understand the fundamental concepts underlying the framework. This
+workshop will feature [introductory
+material](https://docs.google.com/presentation/d/1_v4IuKLFs781pp7x0BwUxv7mwCfPLBTWu320g3lQmME/edit?usp=sharing),
+‘live’ coding, and Q\&A.
 
 ### Instructor
 
-  - Peter Hickey (<hickey@wehi.edu.au>)
+  - [Peter Hickey](https://peterhickey.org/) (<hickey@wehi.edu.au>)
 
 ### Pre-requisites
 
@@ -33,35 +34,32 @@ analysis of single-cell RNA-sequencing data.
   - Familiarity with common operations on matrices in R, such as
     `colSums()` and `colMeans()`.
   - Some familiarity with S4 objects may be helpful but is not required.
-  - Some familiarity with single-cell RNA-sequencing may be helpful but
-    is not required.
 
 ### Workshop Participation
 
-Students will be able to run code interactively during the workshop.
-There will be opportunities throughout the workshop for questions and
-discussion.
+Students will be able to run code examples from the workshop material.
+There will be a Q\&A session in the second half of the workshop.
 
 ### *R* / *Bioconductor* packages used
 
-  - *[DelayedArray](https://bioconductor.org/packages/3.11/DelayedArray)*
-  - *[HDF5Array](https://bioconductor.org/packages/3.11/HDF5Array)*
-  - *[DelayedMatrixStats](https://bioconductor.org/packages/3.11/DelayedMatrixStats)*
-  - *[TENxBrainData](https://bioconductor.org/packages/3.11/TENxBrainData)*
-  - *[TENxPBMCData](https://bioconductor.org/packages/3.11/TENxPBMCData)*
-  - *[BiocSingular](https://bioconductor.org/packages/3.11/BiocSingular)*
-  - *[scater](https://bioconductor.org/packages/3.11/scater)*
-  - *[scran](https://bioconductor.org/packages/3.11/scran)*
+These packages are the focus of this workshop:
+
+  - *[DelayedArray](https://bioconductor.org/packages/3.12/DelayedArray)*
+  - *[HDF5Array](https://bioconductor.org/packages/3.12/HDF5Array)*
+  - *[DelayedMatrixStats](https://bioconductor.org/packages/3.12/DelayedMatrixStats)*
+
+Please see the workshop `DESCRIPTION` for a full list of dependencies.
+
+**TODO**: Check for any other packages with extensive usage.
 
 ### Time outline
 
-| Activity                                       | Time |
-| ---------------------------------------------- | ---- |
-| Introductory material                          | 10m  |
-| First contact                                  | 40m  |
-| Package ecosystem                              | 10m  |
-| Real world encounters analysing scRNA-seq data | 25m  |
-| Workflow tips for DelayedArray-backed analyses | 15m  |
+| Activity                                       | Time   |
+| ---------------------------------------------- | ------ |
+| Introductory material                          | 5 min  |
+| First contact                                  | 20 min |
+| Workflow tips for DelayedArray-backed analyses | 15 min |
+| Q\&A                                           | 15 min |
 
 ### Workshop goals and objectives
 
@@ -73,8 +71,8 @@ discussion.
     *implement* the DelayedArray framework.
   - Become familiar with the fundamental concepts of delayed operations,
     block-processing, and realization.
-  - Reason about potential bottlenecks in algorithms operating on
-    *DelayedArray* objects.
+  - Reason about potential bottlenecks, and how to avoid or reduce
+    these, in algorithms operating on *DelayedArray* objects.
 
 #### Learning objectives
 
