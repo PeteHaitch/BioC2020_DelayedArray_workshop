@@ -1,6 +1,6 @@
 Package: DelayedArrayWorkshop
 Type: Package
-Title: A Workshop on Effectively Using the DelayedArray Framework to Support the Analysis of Large Datasets
+Title: Effectively Using the DelayedArray Framework to Support the Analysis of Large Datasets
 Authors@R: c(
   person(
   given = "Peter",
@@ -29,3 +29,4 @@ License: Artistic-2.0
 VignetteBuilder: knitr
 Encoding: UTF-8
 DockerImage: petehaitch/bioc2020_delayedarray_workshop:latest
+URL: https://petehaitch.github.io/BioC2020_DelayedArray_workshop/
