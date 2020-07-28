@@ -119,6 +119,128 @@ This sized data is challenging, but well within the realms of high performance c
 However, the brain also has extensive non-CpG methylation and there are an order of magnitude more non-CpG loci.
 This necessitated extensive re-factoring of our software tools and we successfully adopted the DelayedArray framework to enable this research.
 
+### Package ecosystem
+
+The DelayedArray framework is, unsurprisingly, implemented in the `r BiocStyle::Biocpkg("DelayedArray")` package.
+However, there are several other key packages that are an important part of the broader 'ecosystem'.
+More importantly, as a user of Bioconductor software, it is increasingly likely that you will encounter *DelayedArray* objects during a data analysis, especially if you are analysing single-cell data[^15].
+The following table lists packages that depend upon the `r BiocStyle::Biocpkg("DelayedArray")` package.
+
+[^15]: In fact, if you use any package that makes use of the *SummarizedExperiment* class, then you will almost certainly load the `r BiocStyle::Biocpkg("DelayedArray")` package during the course of your analysis, whether you know it or not! This is because `r BiocStyle::Biocpkg("SummarizedExperiment")` depends upon `r BiocStyle::Biocpkg("DelayedArray")`.
+
+```{r}
+dep_tbl <- BiocPkgTools::buildPkgDependencyDataFrame()
+da_dep_tbl <- dep_tbl[dep_tbl$dependency == "DelayedArray", 
+                      c("Package", "edgetype")]
+da_dep_tbl <- da_dep_tbl[with(da_dep_tbl, order(edgetype, Package)), ]
+colnames(da_dep_tbl) <- c("Package", "Dependency Type")
+DT::datatable(da_dep_tbl)
+```
+
+We will briefly highlight some of the key packages in this table, broadly categorising these as 'user-focused'/'user-facing' or 'developer-focused' packages and those that span the spectrum.
+
+#### Packages that both users and developers should probably know about
+
+##### `r BiocStyle::Biocpkg("DelayedArray")`
+
+Well, duh.
+Implements the *DelayedArray* and *RleArray* classes, along with all the fundamentals the enable the delayed operations, block processing, and realization that underpin the DelayedArray framework.
+
+##### `r BiocStyle::Biocpkg("HDF5Array")`
+
+Implements the *HDF5Array* and *TENxMatrix* classes, two convenient and memory-efficient array-like containers for on-disk representation of HDF5 datasets. 
+*HDF5Array* is for datasets that use the conventional (i.e. dense) HDF5 representation.
+*TENxMatrix* is for datasets that use the HDF5-based sparse matrix representation from 10x Genomics.
+
+##### `r BiocStyle::Githubpkg("LTLA/TileDBArray")`
+
+Implements a DelayedArray backend for [TileDB](https://tiledb.com/) to read, write and store dense and sparse arrays.
+The resulting *TileDBArray* objects are directly compatible with any Bioconductor package that accepts *DelayedArray* objects, serving as a swap-in replacement for the predominant *HDF5Array* that is currently used throughout the Bioconductor ecosystem for representing large datasets.
+
+**NB**: `r BiocStyle::Githubpkg("LTLA/TileDBArray")` is not yet available from Bioconductor.
+
+##### `r BiocStyle::Biocpkg("DelayedMatrixStats")`
+
+A port of the `r BiocStyle::CRANpkg("matrixStats")` API for use with *DelayedMatrix* objects.
+High-performing functions operating on rows and columns of *DelayedMatrix* objects, e.g. `col` / `rowMedians()`, `col` / `rowRanks()`, and `col` / `rowSds()`.
+Functions optimized per data type and for subsetted calculations such that both memory usage and processing time is minimized. 
+
+Disclaimer: I wrote this one.
+
+##### `r BiocStyle::Biocpkg("BiocSingular")`
+
+Implements exact and approximate methods for singular value decomposition and principal components analysis using a framework that allows them to be easily switched within Bioconductor packages or workflows.
+These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
+
+`r BiocStyle::Biocpkg("BiocSingular")` defines a few interesting specialized *DelayedMatrix* subclasses that aim to preserve sparsity of the original matrix:
+
+- *DeferredMatrix*: Supports deferred centering and scaling of the columns of a matrix prior to principal components analysis.
+- *LowRankMatrix*: Provides a memory-efficient representation of a low-rank reconstruction, e.g., after a principal components analysis.
+- *ResidualMatrix*: Supports delayed calculation of the residuals from a linear model fit, usually prior to principal components analysis.
+
+##### `r BiocStyle::Biocpkg("VCFArray")` and `r BiocStyle::Biocpkg("GDSArray")`
+
+Implements the *VCFArray* and *GDSArray* classes, types of *DelayedArray*, to represent VCF files and GDS-files in an array-like representation. VCF and GDS files are widely used to represent genotyping or sequence data.
+
+##### `r BiocStyle::Biocpkg("rhdf5client")` and `r BiocStyle::Biocpkg("restfulSE")`
+
+Provide functions and classes to interface with remote data stores by operating on *SummarizedExperiment*-like objects.
+These data are HDF5 files living on a remote server running `h5serv`, a REST-based service for HDF5 data.
+
+#### User-focused/user-facing packages
+
+These are the packages that as a user you might directly load/attach with `library()` as part of a data analysis.
+Alternatively, these may be loaded/attached as a dependency[^16] of another package you load/attach as part of an analysis.
+
+[^16]: As listed in the `Depends` field of the package `DESCRIPTION` file.
+
+##### `r BiocStyle::Biocpkg("DropletUtils")`
+
+Provides a number of utility functions for handling single-cell (RNA-seq) data from droplet technologies such as 10X Genomics.
+This includes `read10xCounts()` for data loading from the count matrices produced by 10x Genomics' **CellRanger** software, which may be stored in an HDF5 file. 
+To do this, it makes use of the *TENxMatrix* class.
+
+##### `r BiocStyle::Biocpkg("LoomExperiment")`
+
+Provides a means to convert from 'loom' files to standard Bioconductor classes and back again.
+The [Loom file format](http://linnarssonlab.org/loompy/index.html) uses HDF5 to store experimental data and is used by some tools and labs producing data using single-cell assays.
+This includes the `import()` function for data loading from loom files into an *HDF5Matrix*.
+
+##### `r BiocStyle::Biocpkg("scuttle")`
+
+Provides basic utility functions for performing single-cell analyses, focusing on simple normalization, quality control and data transformations.
+Also provides some helper functions to assist development of other packages.
+These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
+
+##### `r BiocStyle::Biocpkg("batchelor")`
+
+Implements a variety of methods for batch correction of single-cell (RNA sequencing) data, such as `multiBatchPCA()` and `fastMNN()`.
+These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
+
+##### `r BiocStyle::Biocpkg("bsseq")`
+
+A collection of tools for analyzing and visualizing bisulfite sequencing data.
+This was one of the first packages to make use of the DelayedArray framework and it supports these throughout the package.
+This was needed in order to store and analyse large non-CpG methylation datasets (\> 300 million loci, hundreds of samples) using HDF5 files.
+
+Disclaimer: I did this re-write of `r BiocStyle::Biocpkg("bsseq")` and learnt a lot along the way.
+
+##### `r BiocStyle::Biocpkg("minfi")`
+
+Tools to analyze & visualize Illumina Infinium methylation arrays.
+This doesn't have the same level of support for *DelayedMatrix* objects as `r BiocStyle::Biocpkg("bsseq")`, but perhaps one day.
+This is needed in order to store and analyse large methylation datasets (\> 850,000 loci, tens of thousands of) using HDF5 files.
+
+Disclaimer: This was the second package, after `r BiocStyle::Biocpkg("bsseq")`, I started to re-write to support the DelayedArray framework. 
+Here, it is rather more difficult because it is a 'widely' used package and has code from lots of different authors with different styles.
+
+#### Developer-focused packages
+
+##### `r BiocStyle::Biocpkg("beachmat")`
+
+Provides a consistent C++ class interface for reading from and writing data to a variety of commonly used matrix types.
+Ordinary matrices and several sparse/dense `r BiocStyle::CRANpkg("Matrix")` classes are directly supported, third-party S4 classes may be supported by external linkage (such as the *HDF5Matrix* class), while all other matrices are handled by DelayedArray block processing.
+
 ## First contact
 
 ### Motivation
@@ -701,128 +823,6 @@ setRealizationBackend(NULL)
 
 This is probably most useful when writing package code so that you can allow the user control over the realization backend.
 
-## Package ecosystem
-
-The DelayedArray framework is, unsurprisingly, implemented in the `r BiocStyle::Biocpkg("DelayedArray")` package.
-However, there are several other key packages that are an important part of the broader 'ecosystem'.
-More importantly, as a user of Bioconductor software, it is increasingly likely that you will encounter *DelayedArray* objects during a data analysis, especially if you are analysing single-cell data[^15].
-The following table lists packages that depend upon the `r BiocStyle::Biocpkg("DelayedArray")` package.
-
-[^15]: In fact, if you use any package that makes use of the *SummarizedExperiment* class, then you will almost certainly load the `r BiocStyle::Biocpkg("DelayedArray")` package during the course of your analysis, whether you know it or not! This is because `r BiocStyle::Biocpkg("SummarizedExperiment")` depends upon `r BiocStyle::Biocpkg("DelayedArray")`.
-
-```{r}
-dep_tbl <- BiocPkgTools::buildPkgDependencyDataFrame()
-da_dep_tbl <- dep_tbl[dep_tbl$dependency == "DelayedArray", 
-                      c("Package", "edgetype")]
-da_dep_tbl <- da_dep_tbl[with(da_dep_tbl, order(edgetype, Package)), ]
-colnames(da_dep_tbl) <- c("Package", "Dependency Type")
-rmarkdown::paged_table(da_dep_tbl)
-```
-
-We will briefly highlight some of the key packages in this table, broadly categorising these as 'user-focused'/'user-facing' or 'developer-focused' packages and those that span the spectrum.
-
-### Packages that both users and developers should probably know about
-
-#### `r BiocStyle::Biocpkg("DelayedArray")`
-
-Well, duh.
-Implements the *DelayedArray* and *RleArray* classes, along with all the fundamentals the enable the delayed operations, block processing, and realization that underpin the DelayedArray framework.
-
-#### `r BiocStyle::Biocpkg("HDF5Array")`
-
-Implements the *HDF5Array* and *TENxMatrix* classes, two convenient and memory-efficient array-like containers for on-disk representation of HDF5 datasets. 
-*HDF5Array* is for datasets that use the conventional (i.e. dense) HDF5 representation.
-*TENxMatrix* is for datasets that use the HDF5-based sparse matrix representation from 10x Genomics.
-
-#### `r BiocStyle::Githubpkg("LTLA/TileDBArray")`
-
-Implements a DelayedArray backend for [TileDB](https://tiledb.com/) to read, write and store dense and sparse arrays.
-The resulting *TileDBArray* objects are directly compatible with any Bioconductor package that accepts *DelayedArray* objects, serving as a swap-in replacement for the predominant *HDF5Array* that is currently used throughout the Bioconductor ecosystem for representing large datasets.
-
-**NB**: `r BiocStyle::Githubpkg("LTLA/TileDBArray")` is not yet available from Bioconductor.
-
-#### `r BiocStyle::Biocpkg("DelayedMatrixStats")`
-
-A port of the `r BiocStyle::CRANpkg("matrixStats")` API for use with *DelayedMatrix* objects.
-High-performing functions operating on rows and columns of *DelayedMatrix* objects, e.g. `col` / `rowMedians()`, `col` / `rowRanks()`, and `col` / `rowSds()`.
-Functions optimized per data type and for subsetted calculations such that both memory usage and processing time is minimized. 
-
-Disclaimer: I wrote this one.
-
-#### `r BiocStyle::Biocpkg("BiocSingular")`
-
-Implements exact and approximate methods for singular value decomposition and principal components analysis using a framework that allows them to be easily switched within Bioconductor packages or workflows.
-These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
-
-`r BiocStyle::Biocpkg("BiocSingular")` defines a few interesting specialized *DelayedMatrix* subclasses that aim to preserve sparsity of the original matrix:
-
-- *DeferredMatrix*: Supports deferred centering and scaling of the columns of a matrix prior to principal components analysis.
-- *LowRankMatrix*: Provides a memory-efficient representation of a low-rank reconstruction, e.g., after a principal components analysis.
-- *ResidualMatrix*: Supports delayed calculation of the residuals from a linear model fit, usually prior to principal components analysis.
-
-#### `r BiocStyle::Biocpkg("VCFArray")` and `r BiocStyle::Biocpkg("GDSArray")`
-
-Implements the *VCFArray* and *GDSArray* classes, types of *DelayedArray*, to represent VCF files and GDS-files in an array-like representation. VCF and GDS files are widely used to represent genotyping or sequence data.
-
-#### `r BiocStyle::Biocpkg("rhdf5client")` and `r BiocStyle::Biocpkg("restfulSE")`
-
-Provide functions and classes to interface with remote data stores by operating on *SummarizedExperiment*-like objects.
-These data are HDF5 files living on a remote server running `h5serv`, a REST-based service for HDF5 data.
-
-### User-focused/user-facing packages
-
-These are the packages that as a user you might directly load/attach with `library()` as part of a data analysis.
-Alternatively, these may be loaded/attached as a dependency[^16] of another package you load/attach as part of an analysis.
-
-[^16]: As listed in the `Depends` field of the package `DESCRIPTION` file.
-
-#### `r BiocStyle::Biocpkg("DropletUtils")`
-
-Provides a number of utility functions for handling single-cell (RNA-seq) data from droplet technologies such as 10X Genomics.
-This includes `read10xCounts()` for data loading from the count matrices produced by 10x Genomics' **CellRanger** software, which may be stored in an HDF5 file. 
-To do this, it makes use of the *TENxMatrix* class.
-
-#### `r BiocStyle::Biocpkg("LoomExperiment")`
-
-Provides a means to convert from 'loom' files to standard Bioconductor classes and back again.
-The [Loom file format](http://linnarssonlab.org/loompy/index.html) uses HDF5 to store experimental data and is used by some tools and labs producing data using single-cell assays.
-This includes the `import()` function for data loading from loom files into an *HDF5Matrix*.
-
-#### `r BiocStyle::Biocpkg("scuttle")`
-
-Provides basic utility functions for performing single-cell analyses, focusing on simple normalization, quality control and data transformations.
-Also provides some helper functions to assist development of other packages.
-These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
-
-#### `r BiocStyle::Biocpkg("batchelor")`
-
-Implements a variety of methods for batch correction of single-cell (RNA sequencing) data, such as `multiBatchPCA()` and `fastMNN()`.
-These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
-
-#### `r BiocStyle::Biocpkg("bsseq")`
-
-A collection of tools for analyzing and visualizing bisulfite sequencing data.
-This was one of the first packages to make use of the DelayedArray framework and it supports these throughout the package.
-This was needed in order to store and analyse large non-CpG methylation datasets (\> 300 million loci, hundreds of samples) using HDF5 files.
-
-Disclaimer: I did this re-write of `r BiocStyle::Biocpkg("bsseq")` and learnt a lot along the way.
-
-#### `r BiocStyle::Biocpkg("minfi")`
-
-Tools to analyze & visualize Illumina Infinium methylation arrays.
-This doesn't have the same level of support for *DelayedMatrix* objects as `r BiocStyle::Biocpkg("bsseq")`, but perhaps one day.
-This is needed in order to store and analyse large methylation datasets (\> 850,000 loci, tens of thousands of) using HDF5 files.
-
-Disclaimer: This was the second package, after `r BiocStyle::Biocpkg("bsseq")`, I started to re-write to support the DelayedArray framework. 
-Here, it is rather more difficult because it is a 'widely' used package and has code from lots of different authors with different styles.
-
-### Developer-focused packages
-
-#### `r BiocStyle::Biocpkg("beachmat")`
-
-Provides a consistent C++ class interface for reading from and writing data to a variety of commonly used matrix types.
-Ordinary matrices and several sparse/dense `r BiocStyle::CRANpkg("Matrix")` classes are directly supported, third-party S4 classes may be supported by external linkage (such as the *HDF5Matrix* class), while all other matrices are handled by DelayedArray block processing.
-
 ## Workflow tips for DelayedArray-backed analyses
 
 We'll conclude with some miscellaneous tips I've collected over the past few years of using DelayedArray-backed workflows.
@@ -1026,7 +1026,7 @@ However, this is not always possible, such as a function that requires that the 
 Data stored on disk, such as in an HDF5 file, are usually 'chunked' into sub-matrices (for matrix data) or hyper-cubes (for arrays of higher dimension) to allow for more efficient subset selection.
 For example, we could choose to chunk an $R \times C$ matrix by column, by row, or into $r \times c$ sub-matrices ($r \leq R, c \leq C$).
 
-We'll illustrate chunking with the HDF5 format, but similar concepts exist for other disk-backed data (e.g., *TileDBArray*) and even to in-memory data (e.g., *RleArray*).
+We'll illustrate chunking with the HDF5 format, but similar concepts exist for other disk-backed data (e.g., *TileDBArray*, `r BiocStyle::Biocpkg("matter")`) and even to in-memory data (e.g., *RleArray*).
 
 #### Chunk geometry
 
@@ -1164,7 +1164,7 @@ se <- SummarizedExperiment(
 colnames(se) <- paste0("S", seq_len(ncol(se)))
 
 # Check the class of the assay.
-class(assay(tmp))
+class(assay(se))
 ```
 
 What's happened here?
@@ -1202,7 +1202,8 @@ Fair warning: parallelization is tricky and performance may not match expectatio
 
 ### What's in my HDF5 file?
 
-I do this quite a bit: I've got an HDF5 file but I don't know (or have forgotten) what's in it. `rhdf5::h5ls()` to the rescue.
+I do this quite a bit: I've got an HDF5 file but I don't know (or have forgotten) what's in it.
+`rhdf5::h5ls()` to the rescue.
 
 ```{r}
 rhdf5::h5ls(path(counts(sce)))
@@ -1215,23 +1216,24 @@ Some important topics that I omitted and some brief references to further resour
 
 - General construction of a disk-backed *DelayedArray* (e.g., *HDF5Array*) from a bunch of files (e.g., CSV files, BAM files, BED files, BigWig files, etc.)
    - This requires the construction of a `RealizationSink()`.
-   - `bsseq::read.bismark()` and `minfi:::read.metharray2()` are (early) example of constructing a HDF5-backed *SummarizedExperiment* from a bunch of files.
+   - `bsseq::read.bismark()` and `minfi:::read.metharray2()` are (early) examples of constructing a HDF5-backed *SummarizedExperiment* from a bunch of files.
 - Parallelization with disk-backed data.
    - Parallelization performance depends heavily on (A) the choice of backend, and (B) your computer's hardware.
    - Rule of thumb:
        - It's never as straightforward or as big an improvement as you think/hope.
           - Parallel *writing* from files (e.g. HDF5 files) is a no go.
-          - Parallel *reading* is sometimes, maybe, perhaps, okay ... 
+          - Parallel *reading* is sometimes, maybe, perhaps okay ... 
 - Choice of disk-backed backends.
     - `r BiocStyle::Biocpkg("HDF5Array")` is the *de facto* standard in Bioconductor (and HDF5 files are the *de facto* standard for disk-backed array-like datasets in scientific computing).
     - `r BiocStyle::Githubpkg("TileDB-Inc/TileDB-R")` and `r BiocStyle::Githubpkg("LTLA/TileDBArray")` look very interesting but are not available from CRAN/Bioconductor at the time of writing.
+    - The `r BiocStyle::Biocpkg("matter")` package could be the basis of a (hypothetical) *matterArray* backend.
 
 ## Concluding remarks
 
 We've now spent nearly 1 hour learning about the DelayedArray framework.
 Now comes the kicker:
 
-> **Don't use a *DelayedArray* if you can avoid it!**
+> **Don't use a *DelayedArray* if you can don't need to!**
 
 I write that as someone who has a professional love for the DelayedArray framework.
 I've spent many, many hours developing software that supports and extends it, leveraging it to analyse large WGBS and scRNA-seq datasets, and writing and presenting talks and workshops to teach it. 
