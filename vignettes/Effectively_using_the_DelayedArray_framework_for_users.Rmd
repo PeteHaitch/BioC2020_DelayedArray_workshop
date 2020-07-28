@@ -1,6 +1,5 @@
 ---
-title: "Effectively using the DelayedArray framework as a user to support the analysis of large datasets"
-subtitle: "Presented at BioC 2020 (27-31 July)"
+title: "Effectively using the DelayedArray framework to support the analysis of large datasets"
 author: "Peter Hickey"
 date: "Last modified: July 28, 2020; Compiled: `r format(Sys.time(), '%B %d, %Y')`"
 bibliography: "`r system.file(package = 'DelayedArrayWorkshop', 'vignettes', 'ref.bib')`"
@@ -11,7 +10,7 @@ output:
    toc_depth: 3
    fig_width: 5
 vignette: >
-  %\VignetteIndexEntry{Effectively using the DelayedArray framework as a user to support the analysis of large datasets}
+  %\VignetteIndexEntry{Effectively using the DelayedArray framework to support the analysis of large datasets}
   %\VignetteEncoding[ut8]{inputenc}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -119,7 +118,7 @@ This sized data is challenging, but well within the realms of high performance c
 However, the brain also has extensive non-CpG methylation and there are an order of magnitude more non-CpG loci.
 This necessitated extensive re-factoring of our software tools and we successfully adopted the DelayedArray framework to enable this research.
 
-### Package ecosystem
+### The DelayedArray ecosystem
 
 The DelayedArray framework is, unsurprisingly, implemented in the `r BiocStyle::Biocpkg("DelayedArray")` package.
 However, there are several other key packages that are an important part of the broader 'ecosystem'.
@@ -319,7 +318,7 @@ is(tenx, "DelayedArray")
 ```
 
 The data contained in an *HDF5Matrix* is actually stored on disk in a [Hierarchical Data Format (**HDF5**)](https://en.wikipedia.org/wiki/Hierarchical_Data_Format) file.
-Consequently, the `tenx` object takes up relatively little space in memory^[Most of the object's size is due to the dimnames being stored in memory.].
+Consequently, the `tenx` object takes up relatively little space in memory.
 
 ```{r}
 print(object.size(tenx), units = "auto")
@@ -553,13 +552,13 @@ Block processing involves 2 steps:
 
 Some examples of block processing are illustrated in the following figures:
 
-`r knitr::include_graphics("images/Slide1.png")`
-`r knitr::include_graphics("images/Slide2.png")`
-`r knitr::include_graphics("images/Slide3.png")`
-`r knitr::include_graphics("images/Slide4.png")`
-`r knitr::include_graphics("images/Slide5.png")`
-`r knitr::include_graphics("images/Slide6.png")`
-`r knitr::include_graphics("images/Slide7.png")`
+`r knitr::include_graphics("images/block_processing_1.png")`
+`r knitr::include_graphics("images/block_processing_2.png")`
+`r knitr::include_graphics("images/block_processing_3.png")`
+`r knitr::include_graphics("images/block_processing_4.png")`
+`r knitr::include_graphics("images/block_processing_5.png")`
+`r knitr::include_graphics("images/block_processing_6.png")`
+`r knitr::include_graphics("images/block_processing_7.png")`
 
 For example, to compute the column sums we could define a block to be a column, loop over the blocks (columns), load each block (column) into memory, and compute it's sum.
 You may already be thinking:
@@ -635,7 +634,8 @@ The documentation on this topic is a little sparse, but some details can be foun
 Briefly, to perform block processing requires that you:
 
 1. Set up an *ArrayGrid* over the *DelayedArray* to be processed. This specifies the block structure that will be traversed when processing the *DelayedArray*.
-    - The `defaultAutoGrid()`, `rowAutoGrid()`, and `colAutoGrid()` functions can help set up the *ArrayGrid*.
+    - The `defaultAutoGrid()`, `rowAutoGrid()`, and `colAutoGrid()` functions can make automatic grids for block processing.
+    - The `RegularArrayGrid()`, `ArbitraryArrayGrid()`, and `chunkGrid()` functions may be needed for low-level control over the construction of the grids for block processing.
 2. Iterate over the *DelayedArray* via the *ArrayGrid* to read each block of data into memory as an ordinary (i.e. dense) or sparse array and compute the statistic for that block.
     - The `blockApply()` and `blockReduce()` functions can help perform the block processing, even incorporating parallelization via the `r BiocStyle::Biocpkg("BiocParallel")` package.
 3. Appropriately combine the block-level statistics to get your final result.
@@ -662,7 +662,9 @@ identical(basic_colSums(tenx_subset), colSums(tenx_subset))
 #### Try it yourself
 
 - Try modifying `basic_colSums()` to define each block as a group of 100 columns.
-- Try modifying `basic_colSums()` to define each block using the `defaultAutoGrid()`.
+- Try implementing `basic_rowSums()`, a basic `rowSums()`, using `rowAutoGrid()` to define each block as a single rows.
+- Try modifying `basic_rowSums()` to define each block as a group of 10 rows.
+- Try modifying `basic_colSums()` or `basic_rowSums()` to define each block using the `defaultAutoGrid()`.
 
 ### Realization
 
