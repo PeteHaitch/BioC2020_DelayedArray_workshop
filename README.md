@@ -50,8 +50,6 @@ These packages are the focus of this workshop:
 
 Please see the workshop `DESCRIPTION` for a full list of dependencies.
 
-**TODO**: Check for any other packages with extensive usage.
-
 ### Time outline
 
 | Activity                                       | Time   |
