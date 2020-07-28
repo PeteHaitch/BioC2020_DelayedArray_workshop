@@ -25,11 +25,10 @@ ordinary array in R, but allows for the data to be in-memory, on-disk in
 a file, or even hosted on a remote server.
 
 Workshop participants will learn where they might encounter a
-*DelayedArray* in the wild while using Bioconductor and help them
-understand the fundamental concepts underlying the framework. This
-workshop will feature [introductory
-material](https://docs.google.com/presentation/d/1_v4IuKLFs781pp7x0BwUxv7mwCfPLBTWu320g3lQmME/edit?usp=sharing),
-‘live’ coding, and Q\&A.
+*DelayedArray* in the wild while using Bioconductor and understand the
+fundamental concepts underlying the DelayedArray framework. This
+workshop will feature introductory material, ‘live’ coding, and Q\&A,
+all of which are adapted from the content below.
 
 ### Instructor
 
@@ -55,7 +54,9 @@ These packages are the focus of this workshop:
   - *[HDF5Array](https://bioconductor.org/packages/3.12/HDF5Array)*
   - *[DelayedMatrixStats](https://bioconductor.org/packages/3.12/DelayedMatrixStats)*
 
-Please see the workshop `DESCRIPTION` for a full list of dependencies.
+Please see the workshop
+[`DESCRIPTION`](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/blob/master/DESCRIPTION)
+for a full list of dependencies.
 
 ### Time outline
 
@@ -74,8 +75,8 @@ Please see the workshop `DESCRIPTION` for a full list of dependencies.
     framework.
   - Develop a high-level understanding of classes and packages that
     *implement* the DelayedArray framework.
-  - Become familiar with the fundamental concepts of delayed operations,
-    block-processing, and realization.
+  - Become familiar with the fundamental concepts of *delayed
+    operations*, *block processing*, and *realization*.
   - Reason about potential bottlenecks, and how to avoid or reduce
     these, in algorithms operating on *DelayedArray* objects.
 
