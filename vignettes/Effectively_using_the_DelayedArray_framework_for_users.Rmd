@@ -2,7 +2,7 @@
 title: "Effectively using the DelayedArray framework as a user to support the analysis of large datasets"
 subtitle: "Presented at BioC 2020 (27-31 July)"
 author: "Peter Hickey"
-date: "Last modified: July 14, 2020; Compiled: `r format(Sys.time(), '%B %d, %Y')`"
+date: "Last modified: July 28, 2020; Compiled: `r format(Sys.time(), '%B %d, %Y')`"
 bibliography: "`r system.file(package = 'DelayedArrayWorkshop', 'vignettes', 'ref.bib')`"
 output:
   rmarkdown::html_document:
@@ -75,7 +75,7 @@ Please see the workshop `DESCRIPTION` for a full list of dependencies.
 
 - Learn of existing packages and functions that *use* the DelayedArray framework.
 - Develop a high-level understanding of classes and packages that *implement* the DelayedArray framework.
-- Become familiar with the fundamental concepts of delayed operations, block-processing, and realization.
+- Become familiar with the fundamental concepts of delayed operations, block processing, and realization.
 - Reason about potential bottlenecks, and how to avoid or reduce these, in algorithms operating on *DelayedArray* objects.
 
 #### Learning objectives
@@ -87,8 +87,6 @@ Please see the workshop `DESCRIPTION` for a full list of dependencies.
 - Take away some miscellaneous tips and tricks I've learnt over the years when working with DelayedArray-backed objects.
 
 ## Introductory material
-
-**TODO**: Make this material into slides?
 
 Data from a high-throughput biological assay, such as single-cell RNA-sequencing (scRNA-seq), will often be summarised as a matrix of counts, where rows correspond to features and columns to samples[^1].
 Within **Bioconductor**, the *SummarizedExperiment* class is the recommended container for such data, offering a rich interface that tightly links assay measurements to data on the features and the samples.
@@ -122,6 +120,8 @@ However, the brain also has extensive non-CpG methylation and there are an order
 This necessitated extensive re-factoring of our software tools and we successfully adopted the DelayedArray framework to enable this research.
 
 ## First contact
+
+### Motivation
 
 The heart of the DelayedArray framework is implemented in the `r BiocStyle::Biocpkg("DelayedArray")` package, which we now load and attach.
 
@@ -184,7 +184,9 @@ No need for panicked mashing of `Ctrl-c` or `Esc`.
 
 [^3]: You may have seen similar pretty printing with other Bioconductor objects such as *GRanges* and *DataFrame* or with the *data.table* and *tibble* extensions to the *data.frame*. I can't say enough how much I appreciate these thoughtful touches when doing interactive data analysis.
 
-We can now clearly see that `tenx` is no ordinary *matrix*.
+#### A peak behind the curtain
+
+We might now recognise that `tenx` is no ordinary *matrix*.
 In fact, it is an *HDF5Matrix*, which is a type of *DelayedArray*[^4].
 
 [^4]: As with a 2-dimensional *array* in base R being commonly known as a *matrix*, a 2-dimensional *DelayedArray* is also known as a *DelayedMatrix* and a 2-dimensional *HDF5Array* is also known as a *HDF5Matrix*.
@@ -269,7 +271,7 @@ class(median_expression)
 To do so, we made (implicit) use of the three fundamental concepts of the DelayedArray framework:
 
 1. Delayed operations
-2. Block-processing
+2. Block processing
 3. Realization
 
 We'll now discuss each of these in turn.
@@ -310,7 +312,6 @@ x <- tenx_subset + 1L
 showtree(x)
 
 # Compute log of every element (another delayed op).
-# TODO: Demostrate that this preserves sparsity?
 lx <- log(x)
 showtree(lx)
 
@@ -321,8 +322,6 @@ showtree(tlx)
 # Realize a subset of the data as an ordinary matrix.
 as.array(tlx[1:5, 1:10])
 ```
-
-**TODO:** Note that delayed ops are sparsity preserving.
 
 Many common operations can be registered as delayed operations.
 Here are some examples[^6].
@@ -363,7 +362,7 @@ showtree(val)
 
 ```{r}
 tmp <- tenx
-tmp[, 1] <- 100
+tmp[1, ] <- sample(10, ncol(tmp), replace = TRUE)
 tmp
 showtree(tmp)
 ```
@@ -415,79 +414,22 @@ val
 showtree(val)
 ```
 
-### Block-processing
+### Block processing
 
-In [Library sizes], we needed to compute the column sums of `tenx_subset`, whose data live on disk in an HDF5 file.
-One way of achieving this would be to load the entire dataset into memory as an ordinary matrix and then run `base::colSums()`[^8].
+In [Library sizes], we computed the column sums of `tenx_subset` by running `colSums(tenx_subset`).
+If you have used the `colSums()` function in your own R work, then this code likely looks familiar to you.
+However, recall that the `tenx_subset` data live on disk in an HDF5 file, so how did `colSums()` know how to handle this?
 
-[^8]: Here, I use the 'namespaced function' notation for didactic purposes to distinguish `base::colSums()` from the S4 generic `colSums()` and its associated methods. When writing code, however, it is generally not necessary to use the `package::function()` notation, except for all the times that it is ...
+The 'trick' is that we are using a specialised version of `colSums()`^[Specifically, `DelayedArray::colSums()`.] which uses a technique called 'block processing' to compute the column sums.
 
-```{r}
-lib_sizes_in_mem <- colSums(as.array(tenx_subset))
-# Check we get the same result as before.
-identical(lib_sizes_in_mem, lib_sizes)
-```
+#### Illustration of block processing
 
-The `tenx_subset` data are small enough to load into memory, but what if that's not the case[^9]?
-One way you might think to do this is to loop over the columns of the matrix, load that column into memory, and compute it's sum[^10]
+Block processing involves 2 steps: 
 
-[^9]: Recall, For example, that the `tenx` data would occupy more than 140 GB in memory.
+1. Load a 'block' of the data into memory and compute a statistic(s) on the block.
+2. Combine the block-level statistics in an appropriate way to get the final result.
 
-[^10]: In the following code example we could replace `as.array(colSums(tenx_subset[, j, drop = FALSE]))` with `sum(tenx_subset[, j, drop = TRUE])` or, more simply, `sum(tenx_subset[, j])`. This is because subsetting a *DelayedArray* returns an ordinary vector when `drop = TRUE` and the result has only one dimension; see 'Subsetting' in `help("DelayedArray", package = "DelayedArray")`.
-
-```{r}
-lib_sizes_loop_over_cols <- vector("numeric", ncol(tenx_subset))
-for (j in seq_len(ncol(tenx_subset))) {
-  # A simple progress report.
-  if (j %% 100 == 0) message("Processed ", j, "/", ncol(tenx_subset))
-  lib_sizes_loop_over_cols[j] <- colSums(
-    as.array(tenx_subset[, j, drop = FALSE]))
-}
-# Check we get the same result as before.
-# (We'll ignore the names of the result)
-all.equal(lib_sizes_loop_over_cols, lib_sizes, 
-          check.attributes = FALSE)
-```
-
-But what if you can't load even a single column into memory[^11]?
-We might loop over the columns of the matrix, partition each column, load each partition, compute its sum, and then compute the sum of the partition sums.
-
-[^11]: This may seem artificial, but suppose we were dealing with a very 'tall' matrix.
-
-```{r}
-# Here we will partition each column into two equal-sized subsets.
-lib_sizes_loop_over_cols_subset <- vector("numeric", ncol(tenx_subset))
-tmp_colsums <- vector("numeric", 2)
-nr <- nrow(tenx_subset)
-
-for (j in seq_len(ncol(tenx_subset))) {
-  # A simple progress report.
-  if (j %% 100 == 0) message("Processed ", j, "/", ncol(tenx_subset))
-  for (i in 1:2) {
-    i1 <- (i - 1) * nr / 2 + 1
-    i2 <- i * nr / 2
-    tmp_colsums[i] <- colSums(
-      as.array(tenx_subset[seq(i1, i2), j, drop = FALSE]))
-  }
-  lib_sizes_loop_over_cols_subset[j] <- sum(tmp_colsums)
-}
-# Check we get the same result as before.
-# (We'll ignore the names of the result)
-all.equal(lib_sizes_loop_over_cols, lib_sizes, 
-          check.attributes = FALSE)
-```
-
-Hopefully you can now begin to see the general pattern, a strategy which the `r BiocStyle::Biocpkg("DelayedArray")` package calls 'block-processing':
-
-1. Load a 'block' of the data into memory.
-2. Compute a summary statistic.
-3. Combine the block-level statistics in an appropriate way to get the final result.
-
-**TODO**: Demonstrate that this process has been abstracted away with `rowGrid()`/`colGrid()`,`rowAutoGrid()`, and `colAutoGrid()`.
-
-#### Block-processing illustrated
-
-Some examples of block-processing are illustrated in the following figures:
+Some examples of block processing are illustrated in the following figures:
 
 `r knitr::include_graphics("images/Slide1.png")`
 `r knitr::include_graphics("images/Slide2.png")`
@@ -497,20 +439,37 @@ Some examples of block-processing are illustrated in the following figures:
 `r knitr::include_graphics("images/Slide6.png")`
 `r knitr::include_graphics("images/Slide7.png")`
 
-#### Block-processed column sums
+For example, to compute the column sums we could define a block to be a column, loop over the blocks (columns), load each block (column) into memory, and compute it's sum.
+You may already be thinking:
 
-When we run `colSums(tenx_subset`) we are using a block-processed version of column sums, specifically the `colSums,DelayedMatrix-method` implemented in the `r BiocStyle::Biocpkg("DelayedArray")` package.
-We can see this more clearly by turning on verbose progress reporting from the `r BiocStyle::Biocpkg("DelayedArray")` package.
+- "I have a very 'tall' matrix and I can't load even a single column into memory. Can block processing support this?"
+- "I have enough RAM to load 100 columns of my matrix into memory. Can block processing support this?"
+
+The answer to both these questions is generally "yes", which we will return to in the [Block size] section.
+
+### More examples of operations that use block processing
+
+To more clearly see block processing in action, we'll turn on verbose progress reporting from the `r BiocStyle::Biocpkg("DelayedArray")` package.
 
 ```{r}
-# Turn on progress reports for DelayedArray's block-processing routines.
 DelayedArray:::set_verbose_block_processing(TRUE)
-head(colSums(tenx_subset))
 ```
 
-#### More examples of block-processed operations in `r BiocStyle::Biocpkg("DelayedArray")`
+Now, let's re-run `colSums(tenx_subset)`.
 
-Some of the most useful functions in the `r BiocStyle::Biocpkg("DelayedArray")` package implement common operations on a *DelayedMatrix* using block-processing.
+```{r}
+# invisible() is used to prevent the result from printing to the screen.
+invisible(colSums(tenx_subset))
+```
+
+In this case, `colSums()` has processed `tenx_subset` in `r length(defaultAutoGrid(tenx_subset))` blocks.
+The verbose progress report tells us that these blocks are over the *rows* of `tenx_subset`.
+
+Let's take a look at a few more examples of functions implemented with block processing.
+
+#### Functions in DelayedArray
+
+Some of the most useful functions in the `r BiocStyle::Biocpkg("DelayedArray")` package implement common operations on a *DelayedMatrix* using block processing.
 These include the following row and column summarization methods:
 
 - `rowSums()`
@@ -524,93 +483,138 @@ These include the following row and column summarization methods:
 - `rowRanges()`
 - `colRanges()`
 
-Two useful but lesser known functions use block-processing to compute column/row sums of a *DelayedMatrix* based on a grouping variable:
+Two useful but lesser known functions use block processing to compute column/row sums of a *DelayedMatrix* based on a grouping variable:
 
 - `rowsum()`
 - `colsum()`
 
-Finally, matrix multiplication is implemented as a block-processed operation.
+Matrix multiplication is also implemented using block processing:
 
 ```{r}
-# This is mathematically equivalent to rowSums(tenx_subset).
-# TODO: Is this still using block-processing?
-tenx_subset %*% matrix(1, nrow = ncol(tenx_subset))
+# This is mathematically equivalent to colSums(tenx_subset).
+matrix(1, ncol = nrow(tenx_subset)) %*% tenx_subset
 ```
 
-#### DelayedMatrixStats
+#### Functions in DelayedMatrixStats
 
 We've already seen the `r BiocStyle::Biocpkg("DelayedMatrixStats")` package in action back when computing the [Median expression of each gene].
 `r BiocStyle::Biocpkg("DelayedMatrixStats")` is a port of the `r BiocStyle::CRANpkg("matrixStats")` package's API for use with *DelayedMatrix* objects.
 It provides [more than 70 functions](https://github.com/PeteHaitch/DelayedMatrixStats#api-coverage) that apply to rows and columns of *DelayedMatrix* objects.
 
-**TODO**: Include overview of API from README.
+#### Try it yourself
 
-#### General block-processing
+Try out some of the block processing functions from `r BiocStyle::Biocpkg("DelayedArray")` and `r BiocStyle::Biocpkg("DelayedMatrixStats")` on `tenx_subset`^[If you try these out on `tenx` you might be waiting a while, so I don't recommend this in the workshop.].
 
-As we have seen, many common block-processing operations on a *DelayedMatrix* have already been implemented in `r BiocStyle::Biocpkg("DelayedArray")` or are provided by `r BiocStyle::Biocpkg("DelayedMatrixStats")`.
-Nonetheless, there may be times you need to implement your own algorithm using block-processing.
+### General block processing
+
+As we have seen, many common row/column summarization methods on a *DelayedMatrix* have already been implemented in `r BiocStyle::Biocpkg("DelayedArray")` and `r BiocStyle::Biocpkg("DelayedMatrixStats")`.
+Nonetheless, there may be times you need to implement your own algorithm using block processing.
 The documentation on this topic is a little sparse, but some details can be found in `help("block_processing", "DelayedArray"),` `help("ArrayGrid", "DelayedArray")`, `help("blockApply", "DelayedArray")`, and `help("AutoGrid", "DelayedArray")` or by reading the source code of the aforementioned packages. 
-Briefly, to perform block-processing requires that you:
+Briefly, to perform block processing requires that you:
 
-1. Set up an *ArrayGrid* over your *DelayedArray*. This specifies the 'block' structure that will be traversed when processing the *DelayedArray*.
-2. Iterate over the *DelayedArray* via the *ArrayGrid*
-    a.  Read each block of data into memory as an ordinary array using `read_block()`. **TODO**: Mention that sparse data can be read in as sparse array.
-    b.  Compute the statistic for that block
+1. Set up an *ArrayGrid* over the *DelayedArray* to be processed. This specifies the block structure that will be traversed when processing the *DelayedArray*.
+    - The `defaultAutoGrid()`, `rowAutoGrid()`, and `colAutoGrid()` functions can help set up the *ArrayGrid*.
+2. Iterate over the *DelayedArray* via the *ArrayGrid* to read each block of data into memory as an ordinary (i.e. dense) or sparse array and compute the statistic for that block.
+    - The `blockApply()` and `blockReduce()` functions can help perform the block processing, even incorporating parallelization via the `r BiocStyle::Biocpkg("BiocParallel")` package.
 3. Appropriately combine the block-level statistics to get your final result.
+    - This is typically up to you as a developer of the function.
 
-The `blockApply()` and `blockReduce()` functions can help facilitate steps 1-3 , even incorporating parallelization via the `r BiocStyle::Biocpkg("BiocParallel")` package.
+#### Example
+
+Let's implement a basic version of `colSums()` where we define each block to be a column 
+
+```{r}
+basic_colSums <- function(x) {
+  # 1. Set up the ArrayGrid.
+  grid <- colAutoGrid(x, ncol = 1)
+  # 2. Load the blocks into memory and compute the block-level statistics.
+  block_level_stat <- blockApply(x, colSums, grid = grid)
+  # 3. Combine the block-level statistics.
+  unlist(block_level_stat)
+}
+
+# Check basic_colSums() gives the correct result.
+identical(basic_colSums(tenx_subset), colSums(tenx_subset))
+```
+
+#### Try it yourself
+
+- Try modifying `basic_colSums()` to define each block as a group of 100 columns.
+- Try modifying `basic_colSums()` to define each block using the `defaultAutoGrid()`.
 
 ### Realization
 
-To *realize* a *DelayedArray* object is to trigger execution of the delayed operations carried by the object and return the result as an ordinary array **TODO**: or as a sparse array.
-One way to achieve this is to call `as.array()` on it.
+To *realize* a *DelayedArray* object is to trigger execution of the delayed operations carried by the object and return the result as an ordinary (i.e. dense) or sparse array.
+
+#### Realizing in-memory
+
+We can realize a *DelayedArray* in memory as an ordinary (i.e. dense) or sparse array.
+
+To realize a *DelayedArray* as an ordinary array, we can call `as.array()` on it.
 
 ```{r}
 tenx_subset_realized <- as.array(tenx_subset)
-tenx_subset_realized[1:10, 1:10]
+class(tenx_subset_realized)
 ```
 
-However, this realizes the full object at once in memory which could require too much memory if the object is big[^12].
+You may have noticed that the `tenx_subset` data contains a lot of zero values.
+We might therefore opt to realize the data as a sparse matrix, specifically a sparse matrix from the `r BiocStyle::CRANpkg("Matrix")` package.
 
-[^12]: In the above example it's safe because `tenx_subset_realized` only requires around 100 Mb of memory.
+```{r}
+tenx_subset_sparse <- as(tenx_subset, "sparseMatrix")
+class(tenx_subset_sparse)
+```
 
-A large *DelayedArray* object is preferably realized on disk, which is most commonly an HDF5 file **TODO:** Or TileDB file.
+Realizing as a sparse matrix is particularly useful when the data are stored in a sparse *DelayedArray* object^[A sparse *DelayedArray* is one for which `is_sparse()` returns `TRUE`.], such as the *TENxMatrix* object described below.
 
-**TODO:** `as(tenx_subset, "dgCMatrix")`
+#### Realizing to disk
 
-#### Realizing to an HDF5 file
+[Realizing in-memory] realizes the entire object in memory, which could require too much RAM if the object is large[^12].
+Therefore, a large *DelayedArray* object may preferably by realized to disk.
 
-Realizing to an HDF5 file requires that the `r BiocStyle::Biocpkg("HDF5Array")` package is installed[^13]
+[^12]: In the above example it's safe because `tenx_subset` only requires around 100 Mb of memory even as an ordinary array.
 
-[^13]: The `r BiocStyle::Biocpkg("TENxBrainData")` package depends upon `r BiocStyle::Biocpkg("HDF5Array")`, so it is already installed. If you've been following this workflow then you've also already attached it to the search path by running `library(TENxBrainData)`. **TODO**: Check this is true (I think I'm no longer using the TENxBrainData).
+Here we will demonstrate by realizing to an HDF5 file, but we could also realize to another on-disk backend such as a TileDB array (see [Realization backends]).
+Realizing to an HDF5 file requires that the `r BiocStyle::Biocpkg("HDF5Array")` package is installed.
+
+We can realize to disk as a dense array in an HDF5 file (*HDF5Array*) or as a sparse array (*TENxMatrix*).
+
+To realize a *DelayedArray* as a dense array in an HDF5 file, we can call `writeHDF5Array()` on it.
 
 ```{r}
 tenx_subset_hdf5 <- writeHDF5Array(tenx_subset)
-tenx_subset_hdf5
-
-# Alternatively, we could 'coerce' the result to be an HDF5Array.
-as(tenx_subset, "HDF5Array")
 ```
 
-Notice that this process of realization used block-processing, which avoids loading the entire dataset entire memory.
-Also notice that the result of realization is here returned as an *HDF5Matrix*, which no longer carries around the delayed operations.
+To realize a *DelayedArray* as a sparse array in an HDF5 file, we can call `writeTENxMatrix()` on it.
 
 ```{r}
-class(tenx_subset)
-class(tenx_subset_hdf5)
-
-showtree(tenx_subset)
-showtree(tenx_subset_hdf5)
+tenx_subset_sparse_hdf5 <- writeTENxMatrix(tenx_subset)
 ```
 
-Used like this, `writeHDF5Array()` and `as(..., "HDF5Array")` will write their results to a file in *HDF5 dump directory*, a dumping ground for automatically created HDF5 datasets.
+Notice that the process of realization used block processing, which avoids loading the entire dataset entire memory and that the results of these realizations are an *HDF5Matrix* and a *TENxMatrix*, respectively^[The *TENxMatrix* class follows an HDF5-based sparse matrix representation, instead of the conventional (i.e. dense) HDF5 representation, and is used by 10x Genomics.].
+
+```{r}
+class(tenx_subset_hdf5)
+class(tenx_subset_sparse_hdf5)
+```
+
+Furthermore, neither `tenx_subset_hdf5` nor `tenx_subset_sparse_hdf5` carry around the delayed operations of `tenx_subset` because these have been *realized* before writing the data 
+
+```{r}
+# Compare the trees of delayed operations.
+showtree(tenx_subset_hdf5)
+showtree(tenx_subset_sparse_hdf5)
+showtree(tenx_subset)
+```
+
+Used like this, `writeHDF5Array()` and `writeTENxMatrix()` will write their results to a file in the *HDF5 dump directory*, a dumping ground for automatically created HDF5 datasets.
 We can see a log of the operations that have written to the HDF5 dump directory using `showHDF5DumpLog()`.
 
 ```{r}
 showHDF5DumpLog()
 ```
 
-Often, however, we will want full control of where and how the data are written to the HDF5 file[^14] and the `writeHDF5Array()` function gives you full control over this and more.
+Often, however, we will want full control of where and how the data are written to the HDF5 file[^14] and the `writeHDF5Array()` and `writeTENxMatrix()` functions give you full control over this and more.
 
 [^14]: We'll discuss why you might want this later in the workshop.
 
@@ -631,12 +635,15 @@ seed(tenx_subset_my_file_hdf5)
 
 #### Realization backends
 
-We've now seen that we can realize to an HDF5 file. This is called as the HDF5Array 'realization backend' and is implemented in the `r BiocStyle::Biocpkg("HDF5Array")` package.
+We've now seen that we can realize to an HDF5 file.
+This is called the HDF5Array 'realization backend' and is implemented in the `r BiocStyle::Biocpkg("HDF5Array")` package.
 There are a few other realization backends to be aware of.
 
 ```{r}
 supportedRealizationBackends()
 ```
+
+The `r BiocStyle::Githubpkg("LTLA/TileDBArray")` provides a TileDB realization backend, but this packages is not yet available from Bioconductor.
 
 There is also the `NULL` backend, which means the data are realized in memory as an ordinary *array* and then wrapped in a *DelayedArray*.
 This is the default realization backend upon loading/attaching the `r BiocStyle::Biocpkg("DelayedArray")` package.
@@ -667,7 +674,8 @@ tenx_subset %*% matrix(1, nrow = ncol(tenx_subset))
 
 #### The `realize()` function
 
-We've seen that we can realize to the HDF5Array backend using `writeHDF5Array(tenx_subset)` and `as(tenx_subset, "HDF5Array")`.
+We've seen that we can realize to the HDF5Array backend using `writeHDF5Array(tenx_subset)`.
+We could also use coercion by calling `as(tenx_subset, "HDF5Array")`.
 A third way of realizing a *DelayedArray* to an HDF5 file is with the `realize()` function.
 
 ```{r}
@@ -682,11 +690,10 @@ Because it allows us to easily switch out the realization backend and will defer
 getRealizationBackend()
 realize(tenx_subset)
 
-# TODO: This example is broken.
 # # Realize as an RleArray.
-# setRealizationBackend("RleArray")
-# tenx_subset_rlearray <- realize(tenx_subset)
-# tenx_subset_rlearray
+setRealizationBackend("RleArray")
+tenx_subset_rlearray <- realize(tenx_subset)
+tenx_subset_rlearray
 
 # Switch back to the default backend.
 setRealizationBackend(NULL)
@@ -695,8 +702,6 @@ setRealizationBackend(NULL)
 This is probably most useful when writing package code so that you can allow the user control over the realization backend.
 
 ## Package ecosystem
-
-**TODO**: Incorporate into intro intro slides?
 
 The DelayedArray framework is, unsurprisingly, implemented in the `r BiocStyle::Biocpkg("DelayedArray")` package.
 However, there are several other key packages that are an important part of the broader 'ecosystem'.
@@ -749,7 +754,11 @@ Disclaimer: I wrote this one.
 Implements exact and approximate methods for singular value decomposition and principal components analysis using a framework that allows them to be easily switched within Bioconductor packages or workflows.
 These methods work on *DelayedMatrix* objects as well as ordinary *matrix* objects and some sparse matrix objects from the `r BiocStyle::CRANpkg("Matrix")` package.
 
-**TODO**: Mention *DeferredMatrix*, *LowRankMatrix*, and *ResidualMatrix*.
+`r BiocStyle::Biocpkg("BiocSingular")` defines a few interesting specialized *DelayedMatrix* subclasses that aim to preserve sparsity of the original matrix:
+
+- *DeferredMatrix*: Supports deferred centering and scaling of the columns of a matrix prior to principal components analysis.
+- *LowRankMatrix*: Provides a memory-efficient representation of a low-rank reconstruction, e.g., after a principal components analysis.
+- *ResidualMatrix*: Supports delayed calculation of the residuals from a linear model fit, usually prior to principal components analysis.
 
 #### `r BiocStyle::Biocpkg("VCFArray")` and `r BiocStyle::Biocpkg("GDSArray")`
 
@@ -818,11 +827,11 @@ Ordinary matrices and several sparse/dense `r BiocStyle::CRANpkg("Matrix")` clas
 
 We'll conclude with some miscellaneous tips I've collected over the past few years of using DelayedArray-backed workflows.
 
-To demonstrate, we'll create a *SingleCellExperiment* object containing a subset of the `tenx` counts data.
+To demonstrate, we'll create a *SingleCellExperiment* object containing `tenx_subset` (a subset of the `tenx` counts data).
 
 ```{r}
 library(SingleCellExperiment)
-sce <- SingleCellExperiment(assays = list(counts = tenx[, 1:10000]))
+sce <- SingleCellExperiment(assays = list(counts = tenx_subset))
 ```
 
 We term this an HDF5-backed SummarizedExperiment because:
@@ -847,7 +856,8 @@ sce <- logNormCounts(sce)
 The resulting *SingleCellExperiment* object contains two assays - `counts` and `logcounts` - both of which are *DelayedMatrix* objects.
 
 ```{r}
-sce
+assays(sce)
+
 assay(sce, "counts", withDimnames = FALSE)
 assay(sce, "logcounts", withDimnames = FALSE)
 ```
@@ -856,25 +866,76 @@ assay(sce, "logcounts", withDimnames = FALSE)
 
 #### Short version
 
-Use `HDF5Array::saveHDF5SummarizedExperiment()` and `HDF5Array::loadHDF5SummarizedExperiment()` rather than `saveRDS()` and `readRDS()` or `save()` and `load()`.
-Calling `HDF5Array::saveHDF5SummarizedExperiment()` will realize any delayed operations prior to saving the assay data in an HDF5 file, as illustrated below.
+Use `saveHDF5SummarizedExperiment()`, `quickResaveHDF5SummarizedExperiment()`, and `loadHDF5SummarizedExperiment()` rather than `saveRDS()` and `readRDS()` or `save()` and `load()` when saving/loading HDF5-backed *SummarizedExperiment* objects.
+
+Here is an example:
 
 ```{r}
+# Specify the directory where you want to save the object.
+# Here we use a temporary directory.
 dir <- file.path(tempdir(), "my_h5_se")
 saveHDF5SummarizedExperiment(sce, dir, verbose = TRUE)
 
-# There are no delayed operations on the saved version.
+# Load the saved object.
 saved_sce <- loadHDF5SummarizedExperiment(dir)
+```
+
+Note that this directory is relocatable i.e. it can be moved (or copied) to a different place, on the same or a different computer, before calling `loadHDF5SummarizedExperiment()` on it.
+For convenient sharing with collaborators, it is suggested to turn it into a tarball (with Unix command tar), or zip file, before the transfer^[Please keep in mind that `saveHDF5SummarizedExperiment()` and `loadHDF5SummarizedExperiment()` don't know how to produce/read tarballs or zip files at the moment, so the process of packaging/extracting the tarball or zip file is entirely the user responsibility. This is typically done from outside R.].
+
+Calling `saveHDF5SummarizedExperiment()` will realize any delayed operations prior to saving the assay data in an HDF5 file, as illustrated below.
+
+```{r}
+# Compare the trees of delayed operations.
 showtree(logcounts(sce, withDimnames = FALSE))
 showtree(logcounts(saved_sce, withDimnames = FALSE))
 ```
 
-**TODO**: Discuss `quickResaveHDF5SummarizedExperiment()`.
+Finally please note that, depending on the size of the data to write to disk and the performance of the disk, `saveHDF5SummarizedExperiment()` can take a long time to complete^[Use `verbose=TRUE` to see its progress.].
+
+The `quickResaveHDF5SummarizedExperiment()` function can be useful if you have updated a *SummarizedExperiment* already created by an earlier call to `saveHDF5SummarizedExperiment()`.
+For example, suppose you created an HDF5-backed *SummarizedExperiment*, do some pre-processing of the data, and want to save the result.
+
+Here is the object before the pre-processing:
+
+```{r}
+saved_sce
+```
+
+Now, let's mock up pre-processing by adding sample metadata to the *colData*, and excluding certain features (rows) and samples (columns).
+
+```{r}
+# Mock adding sample metadata.
+saved_sce$sample <- c(rep("S1", 400), rep("S2", 600))
+
+# Mock excluding certain features and samples.
+keep_feature <- rbinom(nrow(sce), 1, 0.95)
+keep_sample <- rbinom(ncol(sce), 1, 0.8)
+saved_sce <- saved_sce[keep_feature, keep_sample]
+```
+
+This is the object after the pre-processing:
+
+```{r}
+saved_sce
+```
+
+We can use `quickResaveHDF5SummarizedExperiment()` quickly re-save the pre-processed object.
+This is generally much faster than the initial call to `saveHDF5SummarizedExperiment()` because it does not re-write the assay data to an HDF5 file.
+
+```{r}
+quickResaveHDF5SummarizedExperiment(saved_sce)
+```
+
+Notice that the pre-processing is preserved when we re-load the re-saved HDF5-backed *SummarizedExperiment*.
+
+```{r}
+loadHDF5SummarizedExperiment(dir)
+```
 
 #### Long version
 
-A HDF5-backed *SummarizedExperiment*, like the 10x PBMC dataset we analysed in [Real world encounter with DelayedArray analysing scRNA-seq data], is a light-weight shell (the *SummarizedExperiment*) around a large disk-backed data matrix (the *HDF5Matrix*).
-**TODO**: This is out of date because I've removed the referenced section.
+A HDF5-backed *SummarizedExperiment* is a light-weight shell (the *SummarizedExperiment*) around a large disk-backed data matrix (the *HDF5Matrix*).
 The following explanation comes from `help("saveHDF5SummarizedExperiment", "HDF5Array")`:
 
 Roughly speaking, `saveRDS()` only serializes the part of an object that resides in memory[^17].
@@ -882,9 +943,10 @@ For most objects in R, that's the whole object, so `saveRDS()` does the job.
 
 [^17]: The reality is a little bit more nuanced, but discussing the full details is not important here, and would only distract us
 
-However some objects are pointing to on-disk data. For example:
+However some objects are pointing to on-disk data.
+For example:
 
-- A *TxDb* object from the `r BiocStyle::Biocpkg("GenomicFeatures")` points to an SQLite db
+- A *TxDb* object from the `r BiocStyle::Biocpkg("GenomicFeatures")` points to an SQLite database
 - An *HDF5Array* object points to a dataset in an HDF5 file
 - A *SummarizedExperiment* derivative can have one or more of its assays that point to datasets (one per assay) in an HDF5 file.
 
@@ -892,7 +954,7 @@ These objects have 2 parts: one part is in memory, and one part is on disk.
 The 1st part is sometimes called the object shell and is generally thin (i.e. it has a small memory footprint).
 The 2nd part is the data and is typically big. 
 The object shell and data are linked together via some kind of pointer stored in the shell (e.g. an SQLite connection, or a path to a file, etc.).
-Note that this is a one way link in the sense that the object shell "knows" where to find the on-disk data but the on-disk data knows nothing about the object shell (and is completely agnostic about what kind of object shell could be pointing to it).
+Note that this is a one way link in the sense that the object shell 'knows' where to find the on-disk data but the on-disk data knows nothing about the object shell (and is completely agnostic about what kind of object shell could be pointing to it).
 Furthermore, at any given time on a given system, there could be more than one object shell pointing to the same on-disk data.
 These object shells could exist in the same R session or in sessions in other languages (e.g. Python).
 These various sessions could be run by the same or by different users.
@@ -901,12 +963,13 @@ Using `saveRDS()` on such object will only serialize the shell part so will prod
 
 This is problematic because:
 
-1.  If you later unserialize the object (with `readRDS()`) on the same system where you originally serialized it, it is possible that you will get back an object that is fully functional and semantically equivalent to the original object. But here is the catch: this will be the case **ONLY** if the data is still at the original location and has not been modified (i.e. nobody wrote or altered the data in the SQLite db or HDF5 file in the mean time), and if the serialization/unserialization cycle didn't break the link between the object shell and the data (this serialization/unserialization cycle is known to break open SQLite connections).
+1.  If you later unserialize the object (with `readRDS()`) on the same system where you originally serialized it, it is possible that you will get back an object that is fully functional and semantically equivalent to the original object. But here is the catch: this will be the case **ONLY** if the data is still at the original location and has not been modified (i.e. nobody wrote or altered the data in the SQLite database or HDF5 file in the mean time), and if the serialization/unserialization cycle didn't break the link between the object shell and the data (this serialization/unserialization cycle is known to break open SQLite connections).
 2.  After serialization the object shell and data are stored in separate files (in the new `.rds` file for the shell, still in the original SQLite or HDF5 file for the data), typically in very different places on the file system. But these 2 files are not relocatable, that is, moving or copying them to another system or sending them to collaborators will typically break the link between them. Concretely this means that the object obtained by using `readRDS()` on the destination system will be broken.
 
 `saveHDF5SummarizedExperiment()` addresses these issues by saving the object shell and assay data in a folder that is relocatable.
 
-Note that it only works on *SummarizedExperiment* derivatives. What it does exactly is:
+Note that it only works on *SummarizedExperiment* derivatives.
+What it does exactly is:
 
 1.  Write all the assay data to an HDF5 file
 2.  Serialize the object shell, which in this case is everything in the object that is not the assay data.
@@ -914,66 +977,179 @@ Note that it only works on *SummarizedExperiment* derivatives. What it does exac
 The 2 files (HDF5 and `.rds`) are written to the directory specified by the user.
 The resulting directory contains a full representation of the object and is relocatable, that is, it can be moved or copied to another place on the system, or to another system (possibly after making a tarball of it), where `loadHDF5SummarizedExperiment()` can then be used to load the object back in R.
 
-**TODO**: Discuss `quickResaveHDF5SummarizedExperiment()`.
+`quickResaveHDF5SummarizedExperiment()` preserves the HDF5 file and datasets that the assays in the *SummarizedExperiment* are already pointing to (and which were created by an earlier call to `saveHDF5SummarizedExperiment()`).
+All it does is re-serialize the *SummarizedExperiment* on top of the `.rds` file that is associated with this HDF5 file (and which was created by an earlier call to `saveHDF5SummarizedExperiment(` or `quickResaveHDF5SummarizedExperiment()`).
+Because the delayed operations possibly carried by the assays in x are not realized, this is very fast.
+
+### Block geometry
+
+The block geometry (size and shape) are key determinants of performance when designing/applying functions to *DelayedArray* objects.
+For example, functions may be faster if fewer blocks are required (e.g., to minimise reading data from disk) or a function may require a sample's complete data (i.e. a full column of data) to work at all.
+
+A function should enforce a 'minimal' block geometry (i.e. the geometry required to produce a correct result) whilst also allowing the user to alter the block geometry for improved performance on their system and, ideally, offering some sort of automatic block geometry that is reasonably performant in most applications of the function.
+
+The `r BiocStyle::Biocpkg("DelayedArray")` sets some default values that control the geometry of the automatic blocks.
+These are the automatic block size and the block shape, of which the block size is more relevant to the user.
+
+#### Block size
+
+The `getAutoBlockSize()` gives the automatic size in bytes of a block used when performing automatic block processing.
+By default, this is set to `r getAutoBlockSize()` meaning each block can use up to `r getAutoBlockSize() / 1e6` Mb of data.
+
+Using fewer, larger blocks generally means faster performance (at the cost of higher peak memory usage).
+Conversely, using more, smaller blocks generally means slower performance (at the benefit of lower peak memory usage).
+Therefore, a user may wish to increase/decrease this on machines with sufficient memory by using `setAutoBlockSize()` or by specifying the block size in functions that accept this as an argument.
+
+```{r}
+system.time(colSums(counts(sce, withDimnames = FALSE)))
+
+# Increasing the block size 10-fold.
+setAutoBlockSize(1e9)
+system.time(colSums(counts(sce, withDimnames = FALSE)))
+
+# Decreasing the default block size 100-fold
+setAutoBlockSize(1e6)
+system.time(colSums(counts(sce, withDimnames = FALSE)))
+
+# Reverting to default block size.
+setAutoBlockSize(1e8)
+```
+
+#### Block shape
+
+The choice of block shape is typically be more relevant to the function's designer rather than its users.
+It is desirable to have functions that can handle arbitrary block shapes.
+However, this is not always possible, such as a function that requires that the data be processed by column.
+
+### Chunking
+
+Data stored on disk, such as in an HDF5 file, are usually 'chunked' into sub-matrices (for matrix data) or hyper-cubes (for arrays of higher dimension) to allow for more efficient subset selection.
+For example, we could choose to chunk an $R \times C$ matrix by column, by row, or into $r \times c$ sub-matrices ($r \leq R, c \leq C$).
+
+We'll illustrate chunking with the HDF5 format, but similar concepts exist for other disk-backed data (e.g., *TileDBArray*) and even to in-memory data (e.g., *RleArray*).
+
+#### Chunk geometry
+
+With the `r BiocStyle::Biocpkg("HDF5Array")` package, chunking can be controlled by the `chunkdim` argument when writing data to disk using the `writeHDF5Array()` or `saveHDF5SummarizedExperiment()` functions.
+
+In general, you want your data to be chunked in a manner that supports the type of access patterns you will be subsequently making during your analysis.
+For example, if you know you only need to access data by column then chunk the data by column.
+Of course, you often either don't know in advance what access patterns you need or you need both row and column access.
+In that case, chunking into sub-matrix/hyper-cubes offers the best tradeoff.
+
+We'll demonstrate how chunking can affect performance by computing the column sums of column-chunked and row-chunked versions of the same matrix.
+The row-chunked data are much slower to process than the column-chunked data because it requires many more reads from disk.
+
+```{r}
+# Simulate some data.
+x <- matrix(sample(1e8), ncol = 1e2, nrow = 1e6)
+
+# Turn of verbose progress reporting.
+DelayedArray:::set_verbose_block_processing(FALSE)
+
+# Create column-chunked and row-chunked HDF5Matrix objects.
+x_col <- writeHDF5Array(x, chunkdim = c(nrow(x), 1))
+x_row <- writeHDF5Array(x, chunkdim = c(1, ncol(x)))
+
+# Time computing the column sums.
+system.time(colSums(x_col))
+system.time(colSums(x_row))
+```
+
+#### Chunk compression
+
+With the `r BiocStyle::Biocpkg("HDF5Array")` package, the chunks can be compressed before writing to disk.
+Greater compression will lead to smaller files on disk but will generally require longer to write the files and may require longer to process the files.
+The level of compression is controlled by the by the `level` argument when writing data to disk using the `writeHDF5Array()` or `saveHDF5SummarizedExperiment()` functions.
+
+We'll demonstrate how compression can affect performance by writing uncompressed and maximally-compressed versions of the same matrix to disk and then computing the column sums.
+The uncompressed data are much faster to write but it takes roughly the same time to compute the column sums on both the uncompressed and maximally compressed data.
+These simulated data are not very compressible^[E.g., it's uniformly distributed with few zeros], but the on-disk savings will be more dramatic for other arrays (e.g., try repeating this with the `tenx_subset` data).
+
+```{r}
+# Simulate some data.
+x <- matrix(sample(1e8), ncol = 1e2, nrow = 1e6)
+
+# Time creating uncompressed and maximally-compressed HDF5Matrix objects.
+system.time(x_no_compression <- writeHDF5Array(x, level = 0))
+system.time(x_max_compression <- writeHDF5Array(x, level = 9))
+
+# Size of uncompressed and maximally-compressed HDF5 files on disk.
+file.size(path(x_no_compression))
+file.size(path(x_max_compression))
+
+# Time computing the column sums.
+system.time(colSums(x_no_compression))
+system.time(colSums(x_max_compression))
+```
+
+### Interaction of block geometry and chunk geometry
+
+Within the *DelayedArray* framework, the [Block geometry] and [Chunk geometry] are similar but distinct concepts.
+The difference is this:
+
+> **The block geometry dictates how the data are accessed, the chunk geometry dictates how the data are stored**.
+
+As noted in [Chunk geometry], when you don't know in advance what access patterns you need or you need both row and column access, then chunking into sub-matrix/hyper-cubes is often the best tradeoff.
+
+As a user, increasing the [Block size] is often the easiest way to achieve faster block processing (at the cost of higher peak memory usage) but it may sometimes be beneficial to re-save your data with a chunk geometry that better matches the block geometry of the function(s) you are calling.
 
 ### Avoid subsetting too much and random access patterns
 
 Reordering/subsetting the data may degrade the performance of even seemingly simple operations.
 This is especially true of disk-backed data, where performance is best when reading contiguous chunks of data and worst when having to read data with a random access pattern.
+This is demonstrated below by computing the column sums of the `tenx_subset` and a row-scrambled version thereof.
 
 ```{r}
-x <- counts(sce, withDimnames = FALSE)
-y <- x[sample(nrow(x)), sample(ncol(x))]
-system.time(colSums(x))
+# Compute column sums of tenx_subset.
+system.time(colSums(tenx_subset))
+
+# Compute column sums of a row-scrambled version of tenx_subset.
+y <- tenx_subset[sample(nrow(tenx_subset)), ]
 system.time(colSums(y))
 ```
 
 ### Process, save, repeat
 
 When analysing large datasets, a workflow that is broken up into stages and saves the intermediate outputs can be help preserve one's sanity.
-This is true regardless of whether the DelayedArray framework is used - it sucks having to repeat some long pre-processing computation in order to make a quick plot - but it is especially true for DelayedArray-backed analyses where the accumulation of delayed operations will eventually lead to degraded performance. 
-This means using `saveHDF5SummarizedExperiment()`/`loadHDF5SummarizedExperiment()`, or `realize()`-ing the result if there is sufficient memory available, following time consuming processing of the object.
+This is true regardless of whether the DelayedArray framework is used - it sucks having to repeat some long pre-processing computation in order to make a quick plot - but it is especially true for DelayedArray-backed analyses where the accumulation of delayed operations may eventually lead to degraded performance.
+
+This means using `saveHDF5SummarizedExperiment()`/`quickResaveHDF5SummarizedExperiment()` and `loadHDF5SummarizedExperiment()` following time consuming processing of the object.
 
 ### Pragmatism rules
 
-**TODO**: Needs a re-write.
+The DelayedArray framework coupled with disk-based data can be a powerful way to keep memory usage down, but sometimes you need to apply an algorithm that is too slow or simply doesn't work except on ordinary in-memory arrays.
+Pragmatism is required: find a machine with a lot of RAM, load the data into memory, compute the thing you need, and move on with your life.
 
-We've seen some examples of pragmatism in this workshop: just load the data into memory, compute the thing you need, and move on.
-For the workshop, I used it to 'cheat' in order to speed things up, but it is frequently a valid strategy when analysing data!
-
-For example, a normalized scRNA-seq dataset carries around two matrices: the raw counts and the normalized expression values.
-You might have enough RAM to load one of these a time but not both at once. With a HDF5-backed *SingleCellExperiment* you can easily just load into memory the matrix you actually need at a given step in the analysis.
-
-Another example, with WGBS data you carry around 3 very large matrices.
+For example, with whole-genome bisulfite sequencing (WGBS) data there are 3 very large matrices stored in the *SummarizedExperiment* object.
 But to make a plot of methylation values along a gene promoter, a common requirement, you only need to load in a small 'slice' of one of these matrices.
-With a HDF5-backed *BSseq*[^18] object you can quickly do this.
+With a HDF5-backed *SummarizedExperiment* object you can quickly do this.
 
-[^18]: A *SummarizedExperiment* derivative
-
-This brings us to a perhaps underappreciated advantage of using HDF5-backed *SummarizedExperiment* derivatives, namely that loading the saved data with `HDF5Array::loadHDF5SummarizedExperiment()` is really fast.
-I made extensive use of this when processing large WGBS datasets as I could quickly load the *BSseq* object to compute summaries of the sample metadata (stored in the `colData` of the *BSseq* object), a process that used to take tens of minutes to hours because the 3 large matrices also had to be loaded into memory.
-This has been so useful to me that I now keep even 'small' WGBS datasets as HDF5-backed *BSseq* objects.
-
-This pragmatism has served me well.
-Often times I find myself starting with a very large dataset, do my initial processing using the disk-backed data, and run `saveHDF5SummarizedExperiment()` to produce a 'pristine' object.
-I can then move it to a large-memory machine, do my big computation (e.g., PCA), save the result, and **move on with my life**.
+This brings us to a perhaps under-appreciated advantage of using HDF5-backed *SummarizedExperiment* objects: loading the saved data with `HDF5Array::loadHDF5SummarizedExperiment()` is often **much** faster than loading the in-memory equivalent *SummarizedExperiment*  with `readRDS()`.
+I made extensive use of this when processing large WGBS datasets as I could quickly load the *SummarizedExperiment* object to compute summaries of the sample metadata (stored in the `colData` of the *SummarizedExperiment* object), a process that used to take tens of minutes to hours because the 3 large matrices also had to be loaded into memory.
+This has been so useful to me that I now keep even 'small' WGBS datasets as HDF5-backed *SummarizedExperiment* objects.
 
 ### Avoid 'degrading' to a *DelayedArray*
 
 The DelayedArray framework is implemented using the S4 object oriented system.
 This can be used to write methods that are optimized for a particular backend. For example, we might write a `colMaxs()` method that is optimized for the *TENxMatrix* class by exploiting the sparse storage mode of the underlying data.
-In order for `colMaxs()` to 'know' that it can use this optimized method, however, it needs for the data to be supplied as a *TENxMatrix* instance.
+In order for our hypothetical `colMaxs()` to 'know' that it can use this optimized method, however, it would need the data to be supplied as a *TENxMatrix* instance.
 
-Unfortunately, it is very easy to 'degrade' a specialised *DelayedArray* derivative to a *DelayedArray*.
+Unfortunately, it is very easy to 'degrade' a specialised *DelayedArray* derivative to a *DelayedArray*, as we will demonstrate.
+Let's start with a *TENxMatrix* object:
 
 ```{r}
-# Let's create a TENxMatrix
-tenx_matrix <- as(counts(sce), "TENxMatrix")
-class(tenx_matrix)
+class(tenx_subset_sparse_hdf5)
+```
 
-# All these degrade the result to a DelayedMatrix.
-class(tenx_matrix[, 1:10])
-val <- tenx_matrix
+Some common operations degrade the result to a *DelayedMatrix*, for example:
+
+```{r}
+# Subsetting.
+class(tenx_subset_sparse_hdf5[, 1:10])
+
+# Setting dimnames
+val <- tenx_subset_sparse_hdf5
 dimnames(val) <- list(paste0("R", seq_len(nrow(val))), NULL)
 class(val)
 ```
@@ -981,90 +1157,39 @@ class(val)
 A common scenario where this degrading may occur is when extracting the data from a *SummarizedExperiment*.
 
 ```{r}
-tmp <- SingleCellExperiment(
-  list(counts = tenx_matrix),
-  colData = DataFrame(row.names = paste0("S", seq_len(ncol(tenx_matrix)))))
+# Construct a SummarizedExperiment with a TENxMatrix as an assay.
+se <- SummarizedExperiment(
+  list(counts = tenx_subset_sparse_hdf5))
+# Add some column names.
+colnames(se) <- paste0("S", seq_len(ncol(se)))
+
+# Check the class of the assay.
 class(assay(tmp))
 ```
 
 What's happened here?
-By default, `assay(tmp)` calls `assay(tmp, withDimnames = TRUE)` which has the effect of copying the dimnames from the *SummarizedExperiment* and adding them to the return assay data.
+By default, `assay(se)` calls `assay(se, withDimnames = TRUE)` which has the effect of copying the dimnames from the *SummarizedExperiment* and adding them to the returned assay data.
 As we saw above, setting the dimnames on a *TENxMatrix* (or other *DelayedMatrix* derivative) will degrade it to a *DelayedMatrix*.
-Consequently, running `colMaxs(assay(tmp))` will not call our (hypothetical) optimized method for *TENxMatrix* objects and will instead defer to the slower, more general block-processing method that is implemented for *DelayedMatrix* objects.
+Consequently, running `colMaxs(assay(se))` will not call our (hypothetical) optimized method for *TENxMatrix* objects and will instead defer to the slower, more general block processing method that is implemented for *DelayedMatrix* objects.
 
 To avoid this 'degrading upon assay extraction', we can should set `withDimnames = FALSE`.
 
 ```{r}
-class(assay(tmp, withDimnames = FALSE))
+class(assay(se, withDimnames = FALSE))
 ```
 
 More generally, you may need to avoid degrading a *DelayedArray* derivative to a *DelayedArray* in order to use backend-optimized methods.
 
 ### Make use of sparsity
 
-**TODO:** Demo the sparsity-preserving feature of the DelayedArray framework when used with a sparse array (e.g., the `tenx_matrix` *TENxMatrix* object).
-
-### Block size
-
-**TODO**: Move this up in prominence.
-
-The maximum size of a block used when performing block-processing is given by `getAutoBlockSize()`.
-By default, this is set to `r as.integer(getAutoBlockSize())` meaning each block can use up to `r as.integer(getAutoBlockSize())` / `1e6` = `r getAutoBlockSize() / 1e6` Mb of data.
-
-Using fewer, larger blocks generally means faster performance (at the cost of higher peak memory usage).
-Conversely, users more, smaller blocks generally means slower performance (at the benefit of lower peak memory usage).
-Therefore, we may wish to increase/decrease this on machines with sufficient memory by using `setAutoBlockSize()`.
+Some recent additions to the *DelayedArray* framework allow it to better preserve the sparsity of the data.
+For example, we can preserve the sparsity of $log(x + 1)$ when applied to the sparse `tenx_subset_sparse_hdf5` object.
 
 ```{r}
-# TODO: Check if these resutls mesh with the text.
-system.time(colSums(counts(sce, withDimnames = FALSE)))
-
-# Increasing the block size 10-fold.
-setAutoBlockSize(getAutoBlockSize() * 10)
-system.time(colSums(counts(sce, withDimnames = FALSE)))
-# Reverting to default block size.
-setAutoBlockSize(getAutoBlockSize() / 10)
-
-# Decreasing the block size 10-fold
-setAutoBlockSize(getAutoBlockSize() / 10)
-system.time(colSums(counts(sce, withDimnames = FALSE)))
-# Reverting to default block size.
-setAutoBlockSize(getAutoBlockSize() / 10)
+is_sparse(tenx_subset_sparse_hdf5) # TRUE
+is_sparse(tenx_subset_sparse_hdf5 + 1) # FALSE
+is_sparse(log(tenx_subset_sparse_hdf5 + 1)) # TRUE
 ```
-
-### Chunking
-
-**TODO**: Move this up in prominence.
-
-Data stored in an HDF5 file are usually 'chunked' into sub-matrices (for matrix data) or hyper-cubes (for arrays of higher dimension)[^19].
-For example, we could choose to chunk an $R \times C$ matrix by column, by row, or into $r \times c$ sub-matrices ($r \leq R, c \leq C$).
-This may remind you of the choice of block dimensions used in block-processing. The difference is this:
-
-[^19]: Chunking also applies to other storage formats, such as *RleArray* objects, but we'll focus on the HDF5 format.
-
-> **Block dimensions dictate how the data are accessed, chunk dimensions dictate how the data are stored**.
-
-In general, you want your data to be chunked in a manner that supports the type of access patterns you will be making.
-For example, if you know you only need to access data by column then chunk the data by column.
-Of course, you often either don't know in advance what access patterns you need or you need both row and column access.
-In that case, chunking into sub-matrices offers the best tradeoff.
-
-We'll demonstrate how chunking can affect performance by comparing computing the column sums of a column-chunked and row-chunked dataset.
-
-```{r}
-# TODO: Check if these results mesh with the text.
-
-x <- matrix(sample(1e8), ncol = 1e2, nrow = 1e6)
-x_col <- writeHDF5Array(x, chunkdim = c(nrow(x), 1))
-x_row <- writeHDF5Array(x, chunkdim = c(1, ncol(x)))
-
-system.time(colSums(x_col))
-system.time(colSums(x_row))
-```
-
-Chunking can be controlled by the `chunkdim` argument when writing data to disk using the `writeHDF5Array()` or `saveHDF5SummarizedExperiment()` functions.
-
-**TODO**: Comment on similar functionality in TileDBArray?
 
 ### Parallelization strategies
 
@@ -1083,13 +1208,23 @@ I do this quite a bit: I've got an HDF5 file but I don't know (or have forgotten
 rhdf5::h5ls(path(counts(sce)))
 ```
 
-## Things I didn't discuss
+## Important topics I didn't discuss
 
-**TODO**: Include this section? If so, do a more systematic review and discussion.
+This 1-hour workshop can not cover everything about the DelayedArray framework.
+Some important topics that I omitted and some brief references to further resources are:
 
-- *RealizationSink*
-- General I/O (e.g., how to create a HDF5Matrix from a bunch of files)
-- Parallelization
+- General construction of a disk-backed *DelayedArray* (e.g., *HDF5Array*) from a bunch of files (e.g., CSV files, BAM files, BED files, BigWig files, etc.)
+   - This requires the construction of a `RealizationSink()`.
+   - `bsseq::read.bismark()` and `minfi:::read.metharray2()` are (early) example of constructing a HDF5-backed *SummarizedExperiment* from a bunch of files.
+- Parallelization with disk-backed data.
+   - Parallelization performance depends heavily on (A) the choice of backend, and (B) your computer's hardware.
+   - Rule of thumb:
+       - It's never as straightforward or as big an improvement as you think/hope.
+          - Parallel *writing* from files (e.g. HDF5 files) is a no go.
+          - Parallel *reading* is sometimes, maybe, perhaps, okay ... 
+- Choice of disk-backed backends.
+    - `r BiocStyle::Biocpkg("HDF5Array")` is the *de facto* standard in Bioconductor (and HDF5 files are the *de facto* standard for disk-backed array-like datasets in scientific computing).
+    - `r BiocStyle::Githubpkg("TileDB-Inc/TileDB-R")` and `r BiocStyle::Githubpkg("LTLA/TileDBArray")` look very interesting but are not available from CRAN/Bioconductor at the time of writing.
 
 ## Concluding remarks
 
@@ -1108,7 +1243,7 @@ Analyses will be faster, simpler, and you will have more software options availa
 But when this isn't an option then the DelayedArray framework is a powerful set of packages to help you get your work done.
 For example, I find it pretty remarkable that a first-class single-cell analysis workflow can so seamlessly support the use of both in-memory and disk-backed data.
 
-A huge amount of gratitude is owed to Hervé Pagès, the developer of the `r BiocStyle::Biocpkg("DelayedArray")` package and the broader framework, and Aaron Lun, the main developer many of the key packages for analysing scRNA-seq data that build upon the DelayedArray framework.
+A huge amount of gratitude is owed to Hervé Pagès, the developer of the `r BiocStyle::Biocpkg("DelayedArray")` and `r BiocStyle::Biocpkg("HDF5Array")`  packages and the broader framework; Aaron Lun, the main developer many of the key packages that build upon the DelayedArray framework (particularly for analysing scRNA-seq data); and Mike Smith, the maintainer of the `r BiocStyle::Biocpkg("rhdf5")` package.
 Thank you!
 
 ## Session info
