@@ -14,11 +14,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Effectively using the DelayedArray framework as a user to support the analysis of large datasets
+# Effectively using the DelayedArray framework to support the analysis of large datasets
 
 <!-- badges: start -->
 [![R build status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/.github/workflows/basic_checks.yaml/badge.svg)](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/actions)
 <!-- badges: end -->
+
+## Key resources
+
+- Docker image: [Docker Hub](https://hub.docker.com/repository/docker/petehaitch/bioc2020_delayedarray_workshop)
+- Workshop: [pkgdown website](https://petehaitch.github.io/BioC2020_DelayedArray_workshop)
 
 ## Workshop description
 
@@ -78,3 +83,10 @@ Please see the workshop `DESCRIPTION` for a full list of dependencies.
 - Learn how to load and save a DelayedArray-backed object.
 - Learn how the 'block size' and 'chunking' of the dataset affect performance when operating on *DelayedArray* objects.
 - Take away some miscellaneous tips and tricks I've learnt over the years when working with DelayedArray-backed objects.
+
+## Docker set up
+
+- Run `docker run -e PASSWORD=delayedarray -p 8787:8787 -d --rm petehaitch/bioc2020_delayedarray_workshop`. Use `-v $(pwd):/home/rstudio` argument to map your local directory to the container.
+- Log in to RStudio at [http://localhost:8787](http://localhost:8787) using username `rstudio` and password `yourpassword`. Note that on Windows you need to provide your localhost IP address like `http://191.163.92.108:8787/` - find it using `docker-machine ip default` in Docker's terminal.
+- Run `browseVignettes(package = "DelayedArrayWorkshop")`. Click on one of the links, "HTML", "source", "R code".
+    - In case of `The requested page was not found` error, add `help/` to the URL right after the hostname, e.g., [http://localhost:8787/help/library/DelayedArrayWorkshop/doc/Effectively_using_the_DelayedArray_framework_for_users.html](http://localhost:8787/help/library/DelayedArrayWorkshop/doc/Effectively_using_the_DelayedArray_framework_for_users.html). This is a [known bug](https://github.com/rocker-org/rocker-versioned/issues/178).
