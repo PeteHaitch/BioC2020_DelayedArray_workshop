@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">DelayedArrayWorkshop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.99.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -55,7 +55,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/Effectively_using_the_DelayedArray_framework_for_users.html">Effectively using the DelayedArray framework as a user to support the analysis of large datasets</a>
+      <a href="articles/Effectively_using_the_DelayedArray_framework_for_users.html">Effectively using the DelayedArray framework to support the analysis of large datasets</a>
     </li>
   </ul>
 </li>
@@ -79,16 +79,26 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="effectively-using-the-delayedarray-framework-as-a-user-to-support-the-analysis-of-large-datasets" class="section level1">
+<div id="effectively-using-the-delayedarray-framework-to-support-the-analysis-of-large-datasets" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#effectively-using-the-delayedarray-framework-as-a-user-to-support-the-analysis-of-large-datasets" class="anchor"></a>Effectively using the DelayedArray framework as a user to support the analysis of large datasets</h1></div>
+<a href="#effectively-using-the-delayedarray-framework-to-support-the-analysis-of-large-datasets" class="anchor"></a>Effectively using the DelayedArray framework to support the analysis of large datasets</h1></div>
 <!-- badges: start -->
 
+<div id="key-resources" class="section level2">
+<h2 class="hasAnchor">
+<a href="#key-resources" class="anchor"></a>Key resources</h2>
+<ul>
+<li>Docker image: <a href="https://hub.docker.com/repository/docker/petehaitch/bioc2020_delayedarray_workshop">Docker Hub</a>
+</li>
+<li>Workshop: <a href="https://petehaitch.github.io/BioC2020_DelayedArray_workshop">pkgdown website</a>
+</li>
+</ul>
+</div>
 <div id="workshop-description" class="section level2">
 <h2 class="hasAnchor">
 <a href="#workshop-description" class="anchor"></a>Workshop description</h2>
 <p>This workshop gives an introductory overview of the DelayedArray framework, which can be used by R / Bioconductor packages to support the analysis of large array-like datasets. A <em>DelayedArray</em> is like an ordinary array in R, but allows for the data to be in-memory, on-disk in a file, or even hosted on a remote server.</p>
-<p>Workshop participants will learn where they might encounter a <em>DelayedArray</em> in the wild while using Bioconductor and help them understand the fundamental concepts underlying the framework. This workshop will feature <a href="https://docs.google.com/presentation/d/1_v4IuKLFs781pp7x0BwUxv7mwCfPLBTWu320g3lQmME/edit?usp=sharing">introductory material</a>, ‘live’ coding, and Q&amp;A.</p>
+<p>Workshop participants will learn where they might encounter a <em>DelayedArray</em> in the wild while using Bioconductor and understand the fundamental concepts underlying the DelayedArray framework. This workshop will feature introductory material, ‘live’ coding, and Q&amp;A, all of which are adapted from the content below.</p>
 <div id="instructor" class="section level3">
 <h3 class="hasAnchor">
 <a href="#instructor" class="anchor"></a>Instructor</h3>
@@ -120,7 +130,7 @@
 <li><em><a href="https://bioconductor.org/packages/3.12/HDF5Array">HDF5Array</a></em></li>
 <li><em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em></li>
 </ul>
-<p>Please see the workshop <code>DESCRIPTION</code> for a full list of dependencies.</p>
+<p>Please see the workshop <a href="https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/blob/master/DESCRIPTION"><code>DESCRIPTION</code></a> for a full list of dependencies.</p>
 </div>
 <div id="time-outline" class="section level3">
 <h3 class="hasAnchor">
@@ -159,7 +169,7 @@
 <ul>
 <li>Learn of existing packages and functions that <em>use</em> the DelayedArray framework.</li>
 <li>Develop a high-level understanding of classes and packages that <em>implement</em> the DelayedArray framework.</li>
-<li>Become familiar with the fundamental concepts of delayed operations, block-processing, and realization.</li>
+<li>Become familiar with the fundamental concepts of <em>delayed operations</em>, <em>block processing</em>, and <em>realization</em>.</li>
 <li>Reason about potential bottlenecks, and how to avoid or reduce these, in algorithms operating on <em>DelayedArray</em> objects.</li>
 </ul>
 </div>
@@ -175,6 +185,19 @@
 </ul>
 </div>
 </div>
+</div>
+<div id="docker-set-up" class="section level2">
+<h2 class="hasAnchor">
+<a href="#docker-set-up" class="anchor"></a>Docker set up</h2>
+<ul>
+<li>Run <code>docker run -e PASSWORD=delayedarray -p 8787:8787 -d --rm petehaitch/bioc2020_delayedarray_workshop</code>. Use <code>-v $(pwd):/home/rstudio</code> argument to map your local directory to the container.</li>
+<li>Log in to RStudio at <a href="http://localhost:8787" class="uri">http://localhost:8787</a> using username <code>rstudio</code> and password <code>yourpassword</code>. Note that on Windows you need to provide your localhost IP address like <code>http://191.163.92.108:8787/</code> - find it using <code>docker-machine ip default</code> in Docker’s terminal.</li>
+<li>Run <code><a href="https://rdrr.io/r/utils/browseVignettes.html">browseVignettes(package = "DelayedArrayWorkshop")</a></code>. Click on one of the links, “HTML”, “source”, “R code”.
+<ul>
+<li>In case of <code>The requested page was not found</code> error, add <code>help/</code> to the URL right after the hostname, e.g., <a href="http://localhost:8787/help/library/DelayedArrayWorkshop/doc/Effectively_using_the_DelayedArray_framework_for_users.html" class="uri">http://localhost:8787/help/library/DelayedArrayWorkshop/doc/Effectively_using_the_DelayedArray_framework_for_users.html</a>. This is a <a href="https://github.com/rocker-org/rocker-versioned/issues/178">known bug</a>.</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
   </div>
