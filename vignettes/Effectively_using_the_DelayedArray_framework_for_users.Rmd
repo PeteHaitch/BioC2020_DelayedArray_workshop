@@ -16,6 +16,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
+resource_files:
+  - images/SummarizedExperiment.svg
+  - images/*.png
 ---
 
 ```{r setup, include = FALSE, cache = FALSE}
@@ -96,15 +99,7 @@ Within **Bioconductor**, the *SummarizedExperiment* class is the recommended con
 
 The *SummarizedExperiment* class is used to store rectangular arrays of experimental results (*assays*). Here, each *assay* is drawn as a matrix but higher-dimensional arrays are also supported.
 
-```{r include = FALSE}
-# download current version of SE diagram
-se_path <- file.path(tempdir(), "SE.svg")
-download.file(
-  "https://docs.google.com/feeds/download/drawings/Export?id=1kiC8Qlo1mhSnLDqkGiRNPSo6GWn3C2duBszCFbJCB-g&exportFormat=svg", 
-  se_path)
-```
-
-`r knitr::include_graphics(se_path)`
+`r knitr::include_graphics("images/SummarizedExperiment.svg")`
 
 Traditionally, the assay data are stored in-memory as an ordinary *array* object[^2]. 
 Storing the data in-memory becomes a real pain with the ever-growing size of 'omics datasets. 
@@ -435,7 +430,7 @@ lib_sizes_in_mem <- colSums(as.array(tenx_subset))
 identical(lib_sizes_in_mem, lib_sizes)
 ```
 
-Here the data at `r print(object.size(as.array(tenx_subset)), units = "auto")` are small enough to load into memory, but what if that's not the case[^9]?
+The `tenx_subset` data are small enough to load into memory, but what if that's not the case[^9]?
 One way you might think to do this is to loop over the columns of the matrix, load that column into memory, and compute it's sum[^10]
 
 [^9]: Recall, For example, that the `tenx` data would occupy more than 140 GB in memory.
@@ -496,13 +491,13 @@ Hopefully you can now begin to see the general pattern, a strategy which the `r 
 
 Some examples of block-processing are illustrated in the following figures:
 
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide1.png"))`
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide2.png"))`
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide3.png"))`
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide4.png"))`
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide5.png"))`
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide6.png"))`
-`r knitr::include_graphics(file.path(system.file(package = 'DelayedArrayWorkshop', 'vignettes'), "Slide7.png"))`
+`r knitr::include_graphics("images/Slide1.png")`
+`r knitr::include_graphics("images/Slide2.png")`
+`r knitr::include_graphics("images/Slide3.png")`
+`r knitr::include_graphics("images/Slide4.png")`
+`r knitr::include_graphics("images/Slide5.png")`
+`r knitr::include_graphics("images/Slide6.png")`
+`r knitr::include_graphics("images/Slide7.png")`
 
 #### Block-processed column sums
 
@@ -1059,7 +1054,7 @@ In that case, chunking into sub-matrices offers the best tradeoff.
 We'll demonstrate how chunking can affect performance by comparing computing the column sums of a column-chunked and row-chunked dataset.
 
 ```{r}
-# TODO: Check if these resutls mesh with the text.
+# TODO: Check if these results mesh with the text.
 
 x <- matrix(sample(1e8), ncol = 1e2, nrow = 1e6)
 x_col <- writeHDF5Array(x, chunkdim = c(nrow(x), 1))
