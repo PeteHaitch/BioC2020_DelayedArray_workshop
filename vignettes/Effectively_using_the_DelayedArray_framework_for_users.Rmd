@@ -734,7 +734,7 @@ Here we will demonstrate by realizing to an HDF5 file, but we could also realize
 Realizing to an HDF5 file requires that the `r BiocStyle::Biocpkg("HDF5Array")` package is installed.
 
 We can realize to disk as a dense array in an HDF5 file (*HDF5Array*) or as a sparse array (*TENxMatrix*).
-The process of realization used block processing, which avoids loading the entire dataset entire memory.
+The process of realization uses block processing, which avoids loading the entire dataset into memory at once.
 To more clearly see block processing in action, we'll (temporarily) turn on verbose block processing.
 
 To realize a *DelayedArray* as a dense array in an HDF5 file, we can call `writeHDF5Array()` on it.
@@ -763,7 +763,7 @@ class(tenx_subset_hdf5)
 class(tenx_subset_sparse_hdf5)
 ```
 
-Furthermore, neither `tenx_subset_hdf5` nor `tenx_subset_sparse_hdf5` carry around the delayed operations of `tenx_subset` because these have been *realized* before writing the data 
+Furthermore, neither `tenx_subset_hdf5` nor `tenx_subset_sparse_hdf5` carry around the delayed operations of `tenx_subset` because these have been *realized* before writing the data.
 
 ```{r}
 # Compare the trees of delayed operations.
