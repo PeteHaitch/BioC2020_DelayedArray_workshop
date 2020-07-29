@@ -64,8 +64,8 @@ Please see the workshop [`DESCRIPTION`](https://github.com/PeteHaitch/BioC2020_D
 | Activity                                       | Time   |
 |------------------------------------------------|--------|
 | Introductory material                          | 5 min  |
-| First contact                                  | 20 min |
-| Workflow tips for DelayedArray-backed analyses | 15 min |
+| First contact                                  | 25 min |
+| Workflow tips for DelayedArray-backed analyses | 10 min |
 | Q&A                                            | 15 min |
 
 ### Workshop goals and objectives
@@ -332,7 +332,7 @@ We can learn more about the internals of the `tenx` object using the `seed()` fu
 seed(tenx)
 ```
 
-### Three examples of computing on a DelayedArray
+#### Examples of computing on a DelayedArray
 
 We will now play around with computing on the counts matrix.
 To make things slightly easier, we will first subset the data to the first 1000 samples.
@@ -341,7 +341,7 @@ To make things slightly easier, we will first subset the data to the first 1000 
 tenx_subset <- tenx[, 1:1000]
 ```
 
-#### Library sizes
+##### Library sizes
 
 Firstly, let's compute the library sizes for this subset of samples.
 We can do this using `colSums()`.
@@ -351,7 +351,7 @@ lib_sizes <- colSums(tenx_subset)
 summary(lib_sizes)
 ```
 
-#### Proportion of cells with non-zero expression for each gene
+##### Proportion of cells with non-zero expression for each gene
 
 Secondly, suppose we want to know for each gene the proportion of cells with non-zero expression.
 We can do this using `rowSums()` in conjunction with some standard R commands (logical comparisons and division).
@@ -361,7 +361,7 @@ prop_non_zero <- rowSums(tenx_subset > 0) /  ncol(tenx_subset)
 summary(prop_non_zero)
 ```
 
-#### Median expression of each gene
+##### Median expression of each gene
 
 Finally, suppose we want to know the median expression of each gene.
 Here, we will quantify expression as counts per million (CPM) using library size normalization.
@@ -599,7 +599,7 @@ You may already be thinking:
 
 The answer to both these questions is generally "yes", which we will return to in the [Block size] section.
 
-### More examples of operations that use block processing
+#### Using a function implemented with block processing
 
 To more clearly see block processing in action, we'll (temporarily) turn on verbose block processing and re-run `colSums(tenx_subset)`.
 
@@ -620,7 +620,7 @@ The verbose progress report tells us that these blocks are over the *rows* of `t
 
 Let's take a look at a few more examples of functions implemented with block processing.
 
-#### Functions in DelayedArray
+##### Functions in DelayedArray
 
 Some of the most useful functions in the `r BiocStyle::Biocpkg("DelayedArray")` package implement common operations on a *DelayedMatrix* using block processing.
 These include the following row and column summarization methods:
@@ -648,20 +648,20 @@ Matrix multiplication is also implemented using block processing:
 matrix(1, ncol = nrow(tenx_subset)) %*% tenx_subset
 ```
 
-#### Functions in DelayedMatrixStats
+##### Functions in DelayedMatrixStats
 
 We've already seen the `r BiocStyle::Biocpkg("DelayedMatrixStats")` package in action back when computing the [Median expression of each gene].
 `r BiocStyle::Biocpkg("DelayedMatrixStats")` is a port of the `r BiocStyle::CRANpkg("matrixStats")` package's API for use with *DelayedMatrix* objects.
 It provides [more than 70 functions](https://github.com/PeteHaitch/DelayedMatrixStats#api-coverage) that apply to rows and columns of *DelayedMatrix* objects.
 
-#### Try it yourself
+##### Try it yourself
 
 Try out some of the block processing functions from `r BiocStyle::Biocpkg("DelayedArray")` and `r BiocStyle::Biocpkg("DelayedMatrixStats")` on `tenx_subset`^[If you try these out on `tenx` you might be waiting a while, so I don't recommend this in the workshop.].
 
-### General block processing
+#### Writing a function that implements block processing
 
 As we have seen, many common row/column summarization methods on a *DelayedMatrix* have already been implemented in `r BiocStyle::Biocpkg("DelayedArray")` and `r BiocStyle::Biocpkg("DelayedMatrixStats")`.
-Nonetheless, there may be times you need to implement your own algorithm using block processing.
+Nevertheless, there may be times that you need to write your own function that implements block processing.
 The documentation on this topic is a little sparse, but some details can be found in `?blockApply`, `?ArrayGrid`, and `?AutoGrid`, or by reading the source code of the aforementioned packages. 
 Briefly, to perform block processing requires that you:
 
@@ -673,7 +673,7 @@ Briefly, to perform block processing requires that you:
 3. Appropriately combine the block-level statistics to get your final result.
     - This is typically up to you as a developer of the function.
 
-#### Example
+##### Example
 
 Let's implement a basic version of `colSums()` where we define each block to be a single column.
 
@@ -691,7 +691,7 @@ basic_colSums <- function(x) {
 identical(basic_colSums(tenx_subset), colSums(tenx_subset))
 ```
 
-#### Try it yourself
+##### Try it yourself
 
 - Try modifying `basic_colSums()` to define each block as a group of 100 columns.
 - Try implementing `basic_rowSums()`, a basic `rowSums()`, using `rowAutoGrid()` to define each block as a single rows.

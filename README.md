@@ -63,8 +63,8 @@ for a full list of dependencies.
 | Activity                                       | Time   |
 | ---------------------------------------------- | ------ |
 | Introductory material                          | 5 min  |
-| First contact                                  | 20 min |
-| Workflow tips for DelayedArray-backed analyses | 15 min |
+| First contact                                  | 25 min |
+| Workflow tips for DelayedArray-backed analyses | 10 min |
 | Q\&A                                           | 15 min |
 
 ### Workshop goals and objectives
