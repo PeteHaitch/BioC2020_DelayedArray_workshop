@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DelayedArrayWorkshop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
       </span>
     </div>
 
@@ -86,7 +86,7 @@
       <h1 data-toc-skip>Effectively using the DelayedArray framework to support the analysis of large datasets</h1>
                         <h4 class="author">Peter Hickey</h4>
             
-            <h4 class="date">Last modified: July 28, 2020; Compiled: July 28, 2020</h4>
+            <h4 class="date">Last modified: July 28, 2020; Compiled: July 29, 2020</h4>
       
       
       <div class="hidden name"><code>Effectively_using_the_DelayedArray_framework_for_users.Rmd</code></div>
@@ -148,11 +148,11 @@
 </tr>
 <tr class="even">
 <td>First contact</td>
-<td>20 min</td>
+<td>25 min</td>
 </tr>
 <tr class="odd">
 <td>Workflow tips for DelayedArray-backed analyses</td>
-<td>15 min</td>
+<td>10 min</td>
 </tr>
 <tr class="even">
 <td>Q&amp;A</td>
@@ -211,8 +211,8 @@
 <span class="no">da_dep_tbl</span> <span class="kw">&lt;-</span> <span class="no">da_dep_tbl</span>[<span class="fu"><a href="https://rdrr.io/r/base/with.html">with</a></span>(<span class="no">da_dep_tbl</span>, <span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span>(<span class="no">edgetype</span>, <span class="no">Package</span>)), ]
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(<span class="no">da_dep_tbl</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Package"</span>, <span class="st">"Dependency Type"</span>)
 <span class="kw pkg">DT</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/DT/man/datatable.html">datatable</a></span>(<span class="no">da_dep_tbl</span>)</pre></body></html></div>
-<div id="htmlwidget-12f950c1b5b8500deadf" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-12f950c1b5b8500deadf">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52"],["DelayedDataFrame","DelayedMatrixStats","GDSArray","HDF5Array","restfulSE","rhdf5client","singleCellTK","SummarizedExperiment","VCFArray","batchelor","beachmat","bigPint","BiocSingular","bsseq","CAGEr","celaref","celda","clusterExperiment","DEScan2","DSS","ELMER","FRASER","GenoGAM","GenomicScores","glmGamPoi","gramm4R","hipathia","LoomExperiment","mbkmeans","methrix","methylSig","minfi","netSmooth","PCAtools","RTCGAToolbox","scater","scDblFinder","scMerge","scmeth","scran","scuttle","signatureSearch","SingleR","VariantExperiment","weitrix","BiocGenerics","ChIPpeakAnno","gwascat","iSEE","MAST","S4Vectors","SQLDataFrame"],["Depends","Depends","Depends","Depends","Depends","Depends","Depends","Depends","Depends","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Suggests","Suggests","Suggests","Suggests","Suggests","Suggests","Suggests"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Package<\/th>\n      <th>Dependency Type<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script><div id="packages-that-both-users-and-developers-should-probably-know-about" class="section level4">
+<div id="htmlwidget-8dcd1a0bc6d735f99a16" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8dcd1a0bc6d735f99a16">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52"],["DelayedDataFrame","DelayedMatrixStats","GDSArray","HDF5Array","restfulSE","rhdf5client","singleCellTK","SummarizedExperiment","VCFArray","batchelor","beachmat","bigPint","BiocSingular","bsseq","CAGEr","celaref","celda","clusterExperiment","DEScan2","DSS","ELMER","FRASER","GenoGAM","GenomicScores","glmGamPoi","gramm4R","hipathia","LoomExperiment","mbkmeans","methrix","methylSig","minfi","netSmooth","PCAtools","RTCGAToolbox","scater","scDblFinder","scMerge","scmeth","scran","scuttle","signatureSearch","SingleR","VariantExperiment","weitrix","BiocGenerics","ChIPpeakAnno","gwascat","iSEE","MAST","S4Vectors","SQLDataFrame"],["Depends","Depends","Depends","Depends","Depends","Depends","Depends","Depends","Depends","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Imports","Suggests","Suggests","Suggests","Suggests","Suggests","Suggests","Suggests"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Package<\/th>\n      <th>Dependency Type<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script><div id="packages-that-both-users-and-developers-should-probably-know-about" class="section level4">
 <h4 class="hasAnchor">
 <a href="#packages-that-both-users-and-developers-should-probably-know-about" class="anchor"></a>Packages that both users and developers should probably know about</h4>
 <div id="delayedarray" class="section level5">
@@ -382,7 +382,7 @@
 <span class="co">#&gt; Loading required package: BiocFileCache</span>
 <span class="co">#&gt; Loading required package: dbplyr</span>
 <span class="no">hub</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ExperimentHub/man/ExperimentHub-class.html">ExperimentHub</a></span>()
-<span class="co">#&gt; using temporary cache /tmp/RtmpTuH3xz/BiocFileCache</span>
+<span class="co">#&gt; using temporary cache /tmp/RtmpEfzBkQ/BiocFileCache</span>
 <span class="co">#&gt; snapshotDate(): 2020-07-10</span>
 
 <span class="co"># Query ExperimentHub to find the relevant resource.</span>
@@ -483,7 +483,7 @@
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/RtmpTuH3xz/BiocFileCache/4724cf9d5d1_1040"</span>
+<span class="co">#&gt; [1] "/tmp/RtmpEfzBkQ/BiocFileCache/4723e0deebc_1040"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "counts"</span>
@@ -500,33 +500,32 @@
 <span class="co">#&gt; Slot "first_val":</span>
 <span class="co">#&gt; [1] 0</span></pre></body></html></div>
 </div>
-</div>
-<div id="three-examples-of-computing-on-a-delayedarray" class="section level3">
-<h3 class="hasAnchor">
-<a href="#three-examples-of-computing-on-a-delayedarray" class="anchor"></a>Three examples of computing on a DelayedArray</h3>
+<div id="examples-of-computing-on-a-delayedarray" class="section level4">
+<h4 class="hasAnchor">
+<a href="#examples-of-computing-on-a-delayedarray" class="anchor"></a>Examples of computing on a DelayedArray</h4>
 <p>We will now play around with computing on the counts matrix. To make things slightly easier, we will first subset the data to the first 1000 samples.</p>
 <div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">tenx_subset</span> <span class="kw">&lt;-</span> <span class="no">tenx</span>[, <span class="fl">1</span>:<span class="fl">1000</span>]</pre></body></html></div>
-<div id="library-sizes" class="section level4">
-<h4 class="hasAnchor">
-<a href="#library-sizes" class="anchor"></a>Library sizes</h4>
+<div id="library-sizes" class="section level5">
+<h5 class="hasAnchor">
+<a href="#library-sizes" class="anchor"></a>Library sizes</h5>
 <p>Firstly, let’s compute the library sizes for this subset of samples. We can do this using <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums()</a></code>.</p>
 <div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">lib_sizes</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">tenx_subset</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">lib_sizes</span>)
 <span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
 <span class="co">#&gt;    1453    2755    3898    4689    5548   34233</span></pre></body></html></div>
 </div>
-<div id="proportion-of-cells-with-non-zero-expression-for-each-gene" class="section level4">
-<h4 class="hasAnchor">
-<a href="#proportion-of-cells-with-non-zero-expression-for-each-gene" class="anchor"></a>Proportion of cells with non-zero expression for each gene</h4>
+<div id="proportion-of-cells-with-non-zero-expression-for-each-gene" class="section level5">
+<h5 class="hasAnchor">
+<a href="#proportion-of-cells-with-non-zero-expression-for-each-gene" class="anchor"></a>Proportion of cells with non-zero expression for each gene</h5>
 <p>Secondly, suppose we want to know for each gene the proportion of cells with non-zero expression. We can do this using <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">rowSums()</a></code> in conjunction with some standard R commands (logical comparisons and division).</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">prop_non_zero</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">rowSums</a></span>(<span class="no">tenx_subset</span> <span class="kw">&gt;</span> <span class="fl">0</span>) /  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">tenx_subset</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">prop_non_zero</span>)
 <span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
 <span class="co">#&gt; 0.00000 0.00000 0.00300 0.07235 0.07400 1.00000</span></pre></body></html></div>
 </div>
-<div id="median-expression-of-each-gene" class="section level4">
-<h4 class="hasAnchor">
-<a href="#median-expression-of-each-gene" class="anchor"></a>Median expression of each gene</h4>
+<div id="median-expression-of-each-gene" class="section level5">
+<h5 class="hasAnchor">
+<a href="#median-expression-of-each-gene" class="anchor"></a>Median expression of each gene</h5>
 <p>Finally, suppose we want to know the median expression of each gene. Here, we will quantify expression as counts per million (CPM) using library size normalization.</p>
 <div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="no">cpm</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-utils.html">t</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-utils.html">t</a></span>(<span class="fl">1e6</span> * <span class="no">tenx_subset</span>) / <span class="no">lib_sizes</span>)
 <span class="no">cpm</span>
@@ -571,6 +570,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">median_expression</span>)
 <span class="co">#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. </span>
 <span class="co">#&gt;     0.00     0.00     0.00    18.73     0.00 22069.23</span></pre></body></html></div>
+</div>
 </div>
 <div id="summary" class="section level4">
 <h4 class="hasAnchor">
@@ -801,7 +801,7 @@
 <span class="no">tmp</span>
 <span class="co">#&gt; &lt;27998 x 1306127&gt; matrix of class DelayedMatrix and type "integer":</span>
 <span class="co">#&gt;                [,1]       [,2]       [,3]       [,4] ... [,1306124] [,1306125]</span>
-<span class="co">#&gt;     [1,]          3         10         10         10   .          7          3</span>
+<span class="co">#&gt;     [1,]          8          7          2          6   .          8         10</span>
 <span class="co">#&gt;     [2,]          0          0          0          0   .          0          0</span>
 <span class="co">#&gt;     [3,]          0          0          0          0   .          0          0</span>
 <span class="co">#&gt;     [4,]          0          0          0          0   .          0          0</span>
@@ -813,7 +813,7 @@
 <span class="co">#&gt; [27997,]          0          0          0          0   .          0          0</span>
 <span class="co">#&gt; [27998,]          0          0          0          0   .          0          0</span>
 <span class="co">#&gt;          [,1306126] [,1306127]</span>
-<span class="co">#&gt;     [1,]          6          3</span>
+<span class="co">#&gt;     [1,]          9          4</span>
 <span class="co">#&gt;     [2,]          0          0</span>
 <span class="co">#&gt;     [3,]          0          0</span>
 <span class="co">#&gt;     [4,]          0          0</span>
@@ -1040,10 +1040,9 @@
 </ul>
 <p>The answer to both these questions is generally “yes”, which we will return to in the <a href="#block-size">Block size</a> section.</p>
 </div>
-</div>
-<div id="more-examples-of-operations-that-use-block-processing" class="section level3">
-<h3 class="hasAnchor">
-<a href="#more-examples-of-operations-that-use-block-processing" class="anchor"></a>More examples of operations that use block processing</h3>
+<div id="using-a-function-implemented-with-block-processing" class="section level4">
+<h4 class="hasAnchor">
+<a href="#using-a-function-implemented-with-block-processing" class="anchor"></a>Using a function implemented with block processing</h4>
 <p>To more clearly see block processing in action, we’ll (temporarily) turn on verbose block processing and re-run <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums(tenx_subset)</a></code>.</p>
 <div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="co"># Enable verbose block processing.</span>
 <span class="kw pkg">DelayedArray</span><span class="kw ns">:::</span><span class="fu">set_verbose_block_processing</span>(<span class="fl">TRUE</span>)
@@ -1060,9 +1059,9 @@
 <span class="co">#&gt; [1] TRUE</span></pre></body></html></div>
 <p>In this case, <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums()</a></code> has processed <code>tenx_subset</code> in 2 blocks. The verbose progress report tells us that these blocks are over the <em>rows</em> of <code>tenx_subset</code>.</p>
 <p>Let’s take a look at a few more examples of functions implemented with block processing.</p>
-<div id="functions-in-delayedarray" class="section level4">
-<h4 class="hasAnchor">
-<a href="#functions-in-delayedarray" class="anchor"></a>Functions in DelayedArray</h4>
+<div id="functions-in-delayedarray" class="section level5">
+<h5 class="hasAnchor">
+<a href="#functions-in-delayedarray" class="anchor"></a>Functions in DelayedArray</h5>
 <p>Some of the most useful functions in the <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> package implement common operations on a <em>DelayedMatrix</em> using block processing. These include the following row and column summarization methods:</p>
 <ul>
 <li><code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">rowSums()</a></code></li>
@@ -1088,21 +1087,21 @@
 <span class="co">#&gt;         [,1]    [,2]    [,3] ...  [,999] [,1000]</span>
 <span class="co">#&gt; [1,]    4046    2087    4654   .    7216    5553</span></pre></body></html></div>
 </div>
-<div id="functions-in-delayedmatrixstats" class="section level4">
-<h4 class="hasAnchor">
-<a href="#functions-in-delayedmatrixstats" class="anchor"></a>Functions in DelayedMatrixStats</h4>
+<div id="functions-in-delayedmatrixstats" class="section level5">
+<h5 class="hasAnchor">
+<a href="#functions-in-delayedmatrixstats" class="anchor"></a>Functions in DelayedMatrixStats</h5>
 <p>We’ve already seen the <em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em> package in action back when computing the <a href="#median-expression-of-each-gene">Median expression of each gene</a>. <em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em> is a port of the <em><a href="https://CRAN.R-project.org/package=matrixStats">matrixStats</a></em> package’s API for use with <em>DelayedMatrix</em> objects. It provides <a href="https://github.com/PeteHaitch/DelayedMatrixStats#api-coverage">more than 70 functions</a> that apply to rows and columns of <em>DelayedMatrix</em> objects.</p>
 </div>
-<div id="try-it-yourself" class="section level4">
-<h4 class="hasAnchor">
-<a href="#try-it-yourself" class="anchor"></a>Try it yourself</h4>
+<div id="try-it-yourself" class="section level5">
+<h5 class="hasAnchor">
+<a href="#try-it-yourself" class="anchor"></a>Try it yourself</h5>
 <p>Try out some of the block processing functions from <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> and <em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em> on <code>tenx_subset</code><a href="#fn11" class="footnote-ref" id="fnref11"><sup>11</sup></a>.</p>
 </div>
 </div>
-<div id="general-block-processing" class="section level3">
-<h3 class="hasAnchor">
-<a href="#general-block-processing" class="anchor"></a>General block processing</h3>
-<p>As we have seen, many common row/column summarization methods on a <em>DelayedMatrix</em> have already been implemented in <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> and <em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em>. Nonetheless, there may be times you need to implement your own algorithm using block processing. The documentation on this topic is a little sparse, but some details can be found in <code><a href="https://rdrr.io/pkg/DelayedArray/man/blockApply.html">?blockApply</a></code>, <code><a href="https://rdrr.io/pkg/DelayedArray/man/ArrayGrid-class.html">?ArrayGrid</a></code>, and <code><a href="https://rdrr.io/pkg/DelayedArray/man/AutoGrid.html">?AutoGrid</a></code>, or by reading the source code of the aforementioned packages. Briefly, to perform block processing requires that you:</p>
+<div id="writing-a-function-that-implements-block-processing" class="section level4">
+<h4 class="hasAnchor">
+<a href="#writing-a-function-that-implements-block-processing" class="anchor"></a>Writing a function that implements block processing</h4>
+<p>As we have seen, many common row/column summarization methods on a <em>DelayedMatrix</em> have already been implemented in <em><a href="https://bioconductor.org/packages/3.12/DelayedArray">DelayedArray</a></em> and <em><a href="https://bioconductor.org/packages/3.12/DelayedMatrixStats">DelayedMatrixStats</a></em>. Nevertheless, there may be times that you need to write your own function that implements block processing. The documentation on this topic is a little sparse, but some details can be found in <code><a href="https://rdrr.io/pkg/DelayedArray/man/blockApply.html">?blockApply</a></code>, <code><a href="https://rdrr.io/pkg/DelayedArray/man/ArrayGrid-class.html">?ArrayGrid</a></code>, and <code><a href="https://rdrr.io/pkg/DelayedArray/man/AutoGrid.html">?AutoGrid</a></code>, or by reading the source code of the aforementioned packages. Briefly, to perform block processing requires that you:</p>
 <ol style="list-style-type: decimal">
 <li>Set up an <em>ArrayGrid</em> over the <em>DelayedArray</em> to be processed. This specifies the block structure that will be traversed when processing the <em>DelayedArray</em>.
 <ul>
@@ -1121,9 +1120,9 @@
 </ul>
 </li>
 </ol>
-<div id="example" class="section level4">
-<h4 class="hasAnchor">
-<a href="#example" class="anchor"></a>Example</h4>
+<div id="example" class="section level5">
+<h5 class="hasAnchor">
+<a href="#example" class="anchor"></a>Example</h5>
 <p>Let’s implement a basic version of <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums()</a></code> where we define each block to be a single column.</p>
 <div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="no">basic_colSums</span> <span class="kw">&lt;-</span> <span class="kw">function</span>(<span class="no">x</span>) {
   <span class="co"># 1. Set up the ArrayGrid.</span>
@@ -1138,15 +1137,16 @@
 <span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span>(<span class="fu">basic_colSums</span>(<span class="no">tenx_subset</span>), <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">tenx_subset</span>))
 <span class="co">#&gt; [1] TRUE</span></pre></body></html></div>
 </div>
-<div id="try-it-yourself-1" class="section level4">
-<h4 class="hasAnchor">
-<a href="#try-it-yourself-1" class="anchor"></a>Try it yourself</h4>
+<div id="try-it-yourself-1" class="section level5">
+<h5 class="hasAnchor">
+<a href="#try-it-yourself-1" class="anchor"></a>Try it yourself</h5>
 <ul>
 <li>Try modifying <code>basic_colSums()</code> to define each block as a group of 100 columns.</li>
 <li>Try implementing <code>basic_rowSums()</code>, a basic <code><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">rowSums()</a></code>, using <code><a href="https://rdrr.io/pkg/DelayedArray/man/AutoGrid.html">rowAutoGrid()</a></code> to define each block as a single rows.</li>
 <li>Try modifying <code>basic_rowSums()</code> to define each block as a group of 10 rows.</li>
 <li>Try modifying <code>basic_colSums()</code> or <code>basic_rowSums()</code> to define each block using the <code><a href="https://rdrr.io/pkg/DelayedArray/man/AutoGrid.html">defaultAutoGrid()</a></code>.</li>
 </ul>
+</div>
 </div>
 </div>
 <div id="realization" class="section level3">
@@ -1217,11 +1217,11 @@
 <span class="co">#&gt; └─ 27998x1000 integer, sparse: [seed] TENxMatrixSeed object</span></pre></body></html></div>
 <p>Used like this, <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array()</a></code> and <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeTENxMatrix.html">writeTENxMatrix()</a></code> will write their results to a file in the <em>HDF5 dump directory</em>, a dumping ground for automatically created HDF5 datasets (see <code>?setHDF5DumpDir()</code>). We can see a log of the operations that have written to the HDF5 dump directory using <code><a href="https://rdrr.io/pkg/HDF5Array/man/dump-management.html">showHDF5DumpLog()</a></code>.</p>
 <div class="sourceCode" id="cb38"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/dump-management.html">showHDF5DumpLog</a></span>()
-<span class="co">#&gt; [2020-07-28 23:09:12] #1 In file '/tmp/RtmpTuH3xz/HDF5Array_dump/auto00001.h5': creation of dataset '/HDF5ArrayAUTO00001' (27998x1000:integer, chunkdims=5291x188, level=6)</span>
-<span class="co">#&gt; [2020-07-28 23:09:15] #2 In file '/tmp/RtmpTuH3xz/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/shape' (2:integer, chunkdims=2, level=0)</span>
-<span class="co">#&gt; [2020-07-28 23:09:15] #3 In file '/tmp/RtmpTuH3xz/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/data' (0:integer, chunkdims=16384, level=6)</span>
-<span class="co">#&gt; [2020-07-28 23:09:15] #4 In file '/tmp/RtmpTuH3xz/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/indices' (0:integer, chunkdims=16384, level=6)</span>
-<span class="co">#&gt; [2020-07-28 23:09:15] #5 In file '/tmp/RtmpTuH3xz/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/indptr' (0:integer, chunkdims=4096, level=0)</span></pre></body></html></div>
+<span class="co">#&gt; [2020-07-29 02:12:26] #1 In file '/tmp/RtmpEfzBkQ/HDF5Array_dump/auto00001.h5': creation of dataset '/HDF5ArrayAUTO00001' (27998x1000:integer, chunkdims=5291x188, level=6)</span>
+<span class="co">#&gt; [2020-07-29 02:12:29] #2 In file '/tmp/RtmpEfzBkQ/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/shape' (2:integer, chunkdims=2, level=0)</span>
+<span class="co">#&gt; [2020-07-29 02:12:29] #3 In file '/tmp/RtmpEfzBkQ/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/data' (0:integer, chunkdims=16384, level=6)</span>
+<span class="co">#&gt; [2020-07-29 02:12:29] #4 In file '/tmp/RtmpEfzBkQ/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/indices' (0:integer, chunkdims=16384, level=6)</span>
+<span class="co">#&gt; [2020-07-29 02:12:29] #5 In file '/tmp/RtmpEfzBkQ/HDF5Array_dump/auto00002.h5': creation of dataset '/HDF5ArrayAUTO00002/indptr' (0:integer, chunkdims=4096, level=0)</span></pre></body></html></div>
 <p>Often, however, we will want full control of where and how the data are written to the HDF5 file<a href="#fn14" class="footnote-ref" id="fnref14"><sup>14</sup></a> and the <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array()</a></code> and <code><a href="https://rdrr.io/pkg/HDF5Array/man/writeTENxMatrix.html">writeTENxMatrix()</a></code> functions give you full control over this and more. As an example, we’lll write the data to a user-specified HDF5 file by <a href="#chunking">Chunking</a> along the columns and using maximum <a href="#chunk-compression">Chunk compression</a>.</p>
 <div class="sourceCode" id="cb39"><html><body><pre class="r"><span class="no">my_hdf5_file</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span>(<span class="kw">fileext</span> <span class="kw">=</span> <span class="st">".h5"</span>)
 <span class="no">tenx_subset_my_file_hdf5</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array</a></span>(
@@ -1234,7 +1234,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_subset_hdf5</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/RtmpTuH3xz/HDF5Array_dump/auto00001.h5"</span>
+<span class="co">#&gt; [1] "/tmp/RtmpEfzBkQ/HDF5Array_dump/auto00001.h5"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "/HDF5ArrayAUTO00001"</span>
@@ -1254,7 +1254,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">seed</a></span>(<span class="no">tenx_subset_my_file_hdf5</span>)
 <span class="co">#&gt; An object of class "HDF5ArraySeed"</span>
 <span class="co">#&gt; Slot "filepath":</span>
-<span class="co">#&gt; [1] "/tmp/RtmpTuH3xz/file47217f68c97.h5"</span>
+<span class="co">#&gt; [1] "/tmp/RtmpEfzBkQ/file4721148b200.h5"</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Slot "name":</span>
 <span class="co">#&gt; [1] "/HDF5ArrayAUTO00003"</span>
@@ -1499,22 +1499,22 @@
 <span class="no">dir</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span>(), <span class="st">"my_h5_se"</span>)
 <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/saveHDF5SummarizedExperiment.html">saveHDF5SummarizedExperiment</a></span>(<span class="no">sce</span>, <span class="no">dir</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="co">#&gt; Start writing assay 1/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpTuH3xz/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/RtmpEfzBkQ/my_h5_se/assays.h5</span>
 <span class="co">#&gt; Realizing block 1/2 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 2/2 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Finished writing assay 1/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpTuH3xz/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/RtmpEfzBkQ/my_h5_se/assays.h5</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Start writing assay 2/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpTuH3xz/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/RtmpEfzBkQ/my_h5_se/assays.h5</span>
 <span class="co">#&gt; Realizing block 1/3 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 2/3 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Realizing block 3/3 ... OK, writing it ... OK</span>
 <span class="co">#&gt; Finished writing assay 2/2 to HDF5 file:</span>
-<span class="co">#&gt;   /tmp/RtmpTuH3xz/my_h5_se/assays.h5</span>
+<span class="co">#&gt;   /tmp/RtmpEfzBkQ/my_h5_se/assays.h5</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Serialize SingleCellExperiment object to RDS file:</span>
-<span class="co">#&gt;   /tmp/RtmpTuH3xz/my_h5_se/se.rds</span>
+<span class="co">#&gt;   /tmp/RtmpEfzBkQ/my_h5_se/se.rds</span>
 
 <span class="co"># Load the saved object.</span>
 <span class="no">saved_sce</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/saveHDF5SummarizedExperiment.html">loadHDF5SummarizedExperiment</a></span>(<span class="no">dir</span>)</pre></body></html></div>
@@ -1557,7 +1557,7 @@
 <p>This is the object after the pre-processing (notice the additional <em>colData</em> and altered dimensions):</p>
 <div class="sourceCode" id="cb54"><html><body><pre class="r"><span class="no">saved_sce</span>
 <span class="co">#&gt; class: SingleCellExperiment </span>
-<span class="co">#&gt; dim: 26577 807 </span>
+<span class="co">#&gt; dim: 26545 797 </span>
 <span class="co">#&gt; metadata(0):</span>
 <span class="co">#&gt; assays(2): counts logcounts</span>
 <span class="co">#&gt; rownames: NULL</span>
@@ -1571,7 +1571,7 @@
 <p>Notice that the pre-processing is preserved when we re-load the re-saved HDF5-backed <em>SummarizedExperiment</em>.</p>
 <div class="sourceCode" id="cb56"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/saveHDF5SummarizedExperiment.html">loadHDF5SummarizedExperiment</a></span>(<span class="no">dir</span>)
 <span class="co">#&gt; class: SingleCellExperiment </span>
-<span class="co">#&gt; dim: 26577 807 </span>
+<span class="co">#&gt; dim: 26545 797 </span>
 <span class="co">#&gt; metadata(0):</span>
 <span class="co">#&gt; assays(2): counts logcounts</span>
 <span class="co">#&gt; rownames: NULL</span>
@@ -1632,7 +1632,7 @@
 <span class="co">#&gt; Processing block [[1/2, 2/2]] ... OK</span>
 <span class="co">#&gt; Processing block [[2/2, 2/2]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   0.563   0.040   0.604</span>
+<span class="co">#&gt;   0.498   0.060   0.558</span>
 
 <span class="co"># Increasing the block size 10-fold from its starting default.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">setAutoBlockSize</a></span>(<span class="fl">1e9</span>)
@@ -1640,7 +1640,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html">counts</a></span>(<span class="no">sce</span>, <span class="kw">withDimnames</span> <span class="kw">=</span> <span class="fl">FALSE</span>)))
 <span class="co">#&gt; Processing block [[1/1, 1/1]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   0.517   0.069   0.589</span>
+<span class="co">#&gt;   0.479   0.056   0.535</span>
 
 <span class="co"># Decreasing the block size 10-fold from its starting default.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">setAutoBlockSize</a></span>(<span class="fl">1e7</span>)
@@ -1665,7 +1665,7 @@
 <span class="co">#&gt; Processing block [[2/3, 6/6]] ... OK</span>
 <span class="co">#&gt; Processing block [[3/3, 6/6]] ... OK</span>
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   0.711   0.041   0.751</span>
+<span class="co">#&gt;   0.669   0.028   0.696</span>
 
 <span class="co"># Reverting to default block size.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/AutoBlock-global-settings.html">setAutoBlockSize</a></span>(<span class="fl">1e8</span>)
@@ -1702,10 +1702,10 @@
 <span class="co"># Time computing the column sums.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">x_col</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   1.068   0.077   1.146</span>
+<span class="co">#&gt;   1.032   0.064   1.096</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">x_row</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   9.020   0.885   9.908</span></pre></body></html></div>
+<span class="co">#&gt;   7.129   0.989   8.120</span></pre></body></html></div>
 </div>
 <div id="chunk-compression" class="section level4">
 <h4 class="hasAnchor">
@@ -1718,24 +1718,24 @@
 <span class="co"># Time creating uncompressed and maximally-compressed HDF5Matrix objects.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="no">x_no_compression</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array</a></span>(<span class="no">x</span>, <span class="kw">level</span> <span class="kw">=</span> <span class="fl">0</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   0.767   0.290   1.057</span>
+<span class="co">#&gt;   0.751   0.319   1.071</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="no">x_max_compression</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/HDF5Array/man/writeHDF5Array.html">writeHDF5Array</a></span>(<span class="no">x</span>, <span class="kw">level</span> <span class="kw">=</span> <span class="fl">9</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;  41.283   0.335  42.205</span>
+<span class="co">#&gt;  44.674   0.275  45.863</span>
 
 <span class="co"># Size of uncompressed and maximally-compressed HDF5 files on disk.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/file.info.html">file.size</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">path</a></span>(<span class="no">x_no_compression</span>))
 <span class="co">#&gt; [1] 400040928</span>
 <span class="fu"><a href="https://rdrr.io/r/base/file.info.html">file.size</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/showtree.html">path</a></span>(<span class="no">x_max_compression</span>))
-<span class="co">#&gt; [1] 337060508</span>
+<span class="co">#&gt; [1] 337062512</span>
 
 <span class="co"># Time computing the column sums.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">x_no_compression</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   0.811   0.045   0.855</span>
+<span class="co">#&gt;   0.768   0.068   0.837</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">x_max_compression</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   1.120   0.052   1.173</span></pre></body></html></div>
+<span class="co">#&gt;   1.146   0.069   1.214</span></pre></body></html></div>
 </div>
 </div>
 <div id="interaction-of-block-geometry-and-chunk-geometry" class="section level3">
@@ -1755,13 +1755,13 @@
 <div class="sourceCode" id="cb60"><html><body><pre class="r"><span class="co"># Compute column sums of tenx_subset.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">tenx_subset</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   0.340   0.011   0.352</span>
+<span class="co">#&gt;   0.322   0.007   0.330</span>
 
 <span class="co"># Compute column sums of a row-scrambled version of tenx_subset.</span>
 <span class="no">y</span> <span class="kw">&lt;-</span> <span class="no">tenx_subset</span>[<span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">tenx_subset</span>)), ]
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/DelayedArray/man/DelayedMatrix-stats.html">colSums</a></span>(<span class="no">y</span>))
 <span class="co">#&gt;    user  system elapsed </span>
-<span class="co">#&gt;   1.581   0.031   1.613</span></pre></body></html></div>
+<span class="co">#&gt;   1.500   0.007   1.507</span></pre></body></html></div>
 </div>
 <div id="process-save-repeat" class="section level3">
 <h3 class="hasAnchor">
