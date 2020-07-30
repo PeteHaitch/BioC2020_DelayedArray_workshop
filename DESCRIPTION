@@ -25,7 +25,8 @@ Imports:
   knitr,
   DT
 Suggests:
-    pkgdown
+    pkgdown,
+    TENxBrainData
 License: Artistic-2.0
 VignetteBuilder: knitr
 Encoding: UTF-8
