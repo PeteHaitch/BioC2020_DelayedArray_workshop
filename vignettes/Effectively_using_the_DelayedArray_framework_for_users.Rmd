@@ -63,10 +63,10 @@ Please see the workshop [`DESCRIPTION`](https://github.com/PeteHaitch/BioC2020_D
 
 | Activity                                       | Time   |
 |------------------------------------------------|--------|
-| Introductory material                          | 5 min  |
-| First contact                                  | 25 min |
-| Workflow tips for DelayedArray-backed analyses | 10 min |
-| Q&A                                            | 15 min |
+| Introductory material                          | 8 min  |
+| First contact                                  | 30 min |
+| Workflow tips for DelayedArray-backed analyses | 5 min |
+| Q&A                                            | 12 min |
 
 ### Workshop goals and objectives
 
