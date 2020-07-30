@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">DelayedArrayWorkshop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.4</span>
       </span>
     </div>
 
@@ -188,9 +188,16 @@
 </div>
 </div>
 </div>
-<div id="docker-set-up" class="section level2">
+<div id="installation" class="section level2">
 <h2 class="hasAnchor">
-<a href="#docker-set-up" class="anchor"></a>Docker set up</h2>
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p>This workshop uses Bioconductor version 3.12. At the time of writing, this is the current ‘devel’ version of Bioconductor, which can be installed following <a href="https://www.bioconductor.org/developers/how-to/useDevel/">these instructions</a>.</p>
+<p>You can then install the packages necessary for this workshop using the following:</p>
+<div class="sourceCode" id="cb1"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">BiocManager</span>)
+<span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html">install</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"DelayedArray"</span>, <span class="st">"HDF5Array"</span>, <span class="st">"ExperimentHub"</span>, <span class="st">"DelayedMatrixStats"</span>,
+  <span class="st">"BiocPkgTools"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"BiocStyle"</span>, <span class="st">"rhdf5"</span>, <span class="st">"SingleCellExperiment"</span>,
+  <span class="st">"scuttle"</span>, <span class="st">"knitr"</span>, <span class="st">"DT"</span>))</pre></div>
+<p>Alternatively, you can might like to use Docker to runt he workshop in a container with R, all the necessary packages, and RStudio. This can be done as follows:</p>
 <ul>
 <li>Run <code>docker run -e PASSWORD=delayedarray -p 8787:8787 -d --rm petehaitch/bioc2020_delayedarray_workshop</code>. Use <code>-v $(pwd):/home/rstudio</code> argument to map your local directory to the container.</li>
 <li>Log in to RStudio at <a href="http://localhost:8787" class="uri">http://localhost:8787</a> using username <code>rstudio</code> and password <code>yourpassword</code>. Note that on Windows you need to provide your localhost IP address like <code>http://191.163.92.108:8787/</code> - find it using <code>docker-machine ip default</code> in Docker’s terminal.</li>
