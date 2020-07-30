@@ -93,7 +93,26 @@ for a full list of dependencies.
   - Take away some miscellaneous tips and tricks I’ve learnt over the
     years when working with DelayedArray-backed objects.
 
-## Docker set up
+## Installation
+
+This workshop uses Bioconductor version 3.12. At the time of writing,
+this is the current ‘devel’ version of Bioconductor, which can be
+installed following [these
+instructions](https://www.bioconductor.org/developers/how-to/useDevel/).
+
+You can then install the packages necessary for this workshop using the
+following:
+
+``` r
+library(BiocManager)
+install(c("DelayedArray", "HDF5Array", "ExperimentHub", "DelayedMatrixStats",
+  "BiocPkgTools", "rmarkdown", "BiocStyle", "rhdf5", "SingleCellExperiment",
+  "scuttle", "knitr", "DT"))
+```
+
+Alternatively, you can might like to use Docker to runt he workshop in a
+container with R, all the necessary packages, and RStudio. This can be
+done as follows:
 
   - Run `docker run -e PASSWORD=delayedarray -p 8787:8787 -d --rm
     petehaitch/bioc2020_delayedarray_workshop`. Use `-v

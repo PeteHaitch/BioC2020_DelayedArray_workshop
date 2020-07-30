@@ -85,8 +85,22 @@ Please see the workshop [`DESCRIPTION`](https://github.com/PeteHaitch/BioC2020_D
 - Learn how the 'block size' and 'chunking' of the dataset affect performance when operating on *DelayedArray* objects.
 - Take away some miscellaneous tips and tricks I've learnt over the years when working with DelayedArray-backed objects.
 
+## Installation
 
-## Docker set up
+This workshop uses Bioconductor version 3.12.
+At the time of writing, this is the current 'devel' version of Bioconductor, which can be installed following [these instructions](https://www.bioconductor.org/developers/how-to/useDevel/).
+
+You can then install the packages necessary for this workshop using the following:
+
+```{r, eval = FALSE}
+library(BiocManager)
+install(c("DelayedArray", "HDF5Array", "ExperimentHub", "DelayedMatrixStats",
+  "BiocPkgTools", "rmarkdown", "BiocStyle", "rhdf5", "SingleCellExperiment",
+  "scuttle", "knitr", "DT"))
+```
+
+Alternatively, you can might like to use Docker to runt he workshop in a container with R, all the necessary packages, and RStudio.
+This can be done as follows:
 
 - Run `docker run -e PASSWORD=delayedarray -p 8787:8787 -d --rm petehaitch/bioc2020_delayedarray_workshop`. Use `-v $(pwd):/home/rstudio` argument to map your local directory to the container.
 - Log in to RStudio at [http://localhost:8787](http://localhost:8787) using username `rstudio` and password `yourpassword`. Note that on Windows you need to provide your localhost IP address like `http://191.163.92.108:8787/` - find it using `docker-machine ip default` in Docker's terminal.
