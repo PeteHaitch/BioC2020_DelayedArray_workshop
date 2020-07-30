@@ -13,8 +13,9 @@ status](https://github.com/PeteHaitch/BioC2020_DelayedArray_workshop/workflows/.
 
   - Docker image: [Docker
     Hub](https://hub.docker.com/repository/docker/petehaitch/bioc2020_delayedarray_workshop)
-  - Workshop: [pkgdown
+  - Workshop material: [pkgdown
     website](https://petehaitch.github.io/BioC2020_DelayedArray_workshop)
+  - Video: [YouTube](https://youtu.be/Ew_3RdtszBs)
 
 ## Workshop description
 
@@ -62,10 +63,10 @@ for a full list of dependencies.
 
 | Activity                                       | Time   |
 | ---------------------------------------------- | ------ |
-| Introductory material                          | 5 min  |
-| First contact                                  | 25 min |
-| Workflow tips for DelayedArray-backed analyses | 10 min |
-| Q\&A                                           | 15 min |
+| Introductory material                          | 8 min  |
+| First contact                                  | 30 min |
+| Workflow tips for DelayedArray-backed analyses | 5 min  |
+| Q\&A                                           | 12 min |
 
 ### Workshop goals and objectives
 
